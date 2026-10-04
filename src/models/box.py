@@ -5,7 +5,10 @@ from typing import List, Tuple
 class Box: 
     label: str
     dimensions: Tuple[int, int, int] 
-    box_id: int = 0 
+    value: int 
+    weight: int 
+    is_fragile: bool = False 
+    
 
     def volume(self) -> int: 
         return self.dimensions[0] * self.dimensions[1] * self.dimensions[2] 
@@ -27,6 +30,7 @@ class Box:
                 seen.add(r) 
                 unique.append(r)
         return unique 
+ 
 
 @dataclass 
 class PlacedBox: 
@@ -51,3 +55,5 @@ class PlacedBox:
         y_overlap = b1[1][0] < b2[1][1] and b1[1][1] > b2[1][0] 
         z_overlap = b1[2][0] < b2[2][1] and b1[2][1] > b2[2][0] 
         return x_overlap and y_overlap and z_overlap
+    
+
