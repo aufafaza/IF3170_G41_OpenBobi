@@ -1,0 +1,73 @@
+{
+  "truck": {
+    "label": "SmallTruck",
+    "dimensions": [6, 8, 4],
+    "max_capacity": 150
+  },
+  "packages": [
+    {
+      "id": "PKG_A",
+      "dimensions": [3, 4, 2],
+      "value": 100,
+      "weight": 20,
+      "is_fragile": false,
+      "eta": 2
+    },
+    {
+      "id": "PKG_B",
+      "dimensions": [3, 4, 1],
+      "value": 70,
+      "weight": 15,
+      "is_fragile": false,
+      "eta": 3
+    },
+    {
+      "id": "PKG_C",
+      "dimensions": [2, 3, 2],
+      "value": 60,
+      "weight": 10,
+      "is_fragile": true,
+      "eta": 1
+    },
+    {
+      "id": "PKG_D",
+      "dimensions": [2, 3, 1],
+      "value": 45,
+      "weight": 8,
+      "is_fragile": false,
+      "eta": 4
+    },
+    {
+      "id": "PKG_E",
+      "dimensions": [3, 3, 2],
+      "value": 80,
+      "weight": 25,
+      "is_fragile": false,
+      "eta": 2
+    },
+    {
+      "id": "PKG_F",
+      "dimensions": [2, 2, 2],
+      "value": 50,
+      "weight": 12,
+      "is_fragile": true,
+      "eta": 1
+    },
+    {
+      "id": "PKG_G",
+      "dimensions": [4, 4, 1],
+      "value": 90,
+      "weight": 30,
+      "is_fragile": false,
+      "eta": 5
+    },
+    {
+      "id": "PKG_H",
+      "dimensions": [2, 2, 1],
+      "value": 35,
+      "weight": 5,
+      "is_fragile": false,
+      "eta": 2
+    }
+  ]
+}

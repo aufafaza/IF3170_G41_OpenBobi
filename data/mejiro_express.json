@@ -1,0 +1,169 @@
+{
+  "truck": {
+    "label": "MejiroExpress_Truck01",
+    "dimensions": [10, 20, 5],
+    "max_capacity": 500
+  },
+  "packages": [
+    {
+      "id": "RusdiPackage",
+      "dimensions": [3, 4, 1],
+      "value": 60,
+      "weight": 5,
+      "is_fragile": false,
+      "eta": 3
+    },
+    {
+      "id": "McQueenSweets",
+      "dimensions": [2, 3, 2],
+      "value": 85,
+      "weight": 8,
+      "is_fragile": true,
+      "eta": 1
+    },
+    {
+      "id": "SpecialCarrotCrate",
+      "dimensions": [4, 5, 2],
+      "value": 120,
+      "weight": 25,
+      "is_fragile": false,
+      "eta": 2
+    },
+    {
+      "id": "GoldShipGadgets",
+      "dimensions": [3, 3, 2],
+      "value": 150,
+      "weight": 14,
+      "is_fragile": true,
+      "eta": 4
+    },
+    {
+      "id": "TeioShoes",
+      "dimensions": [2, 4, 1],
+      "value": 70,
+      "weight": 6,
+      "is_fragile": false,
+      "eta": 2
+    },
+    {
+      "id": "RiceShowerBento",
+      "dimensions": [2, 2, 1],
+      "value": 45,
+      "weight": 4,
+      "is_fragile": true,
+      "eta": 1
+    },
+    {
+      "id": "HokkaidoApples",
+      "dimensions": [5, 6, 2],
+      "value": 180,
+      "weight": 40,
+      "is_fragile": false,
+      "eta": 5
+    },
+    {
+      "id": "TrainerDocs",
+      "dimensions": [2, 3, 1],
+      "value": 50,
+      "weight": 3,
+      "is_fragile": false,
+      "eta": 1
+    },
+    {
+      "id": "SpurtDrinkBoxes",
+      "dimensions": [4, 4, 2],
+      "value": 110,
+      "weight": 22,
+      "is_fragile": false,
+      "eta": 3
+    },
+    {
+      "id": "CrystalTrophy",
+      "dimensions": [2, 2, 3],
+      "value": 200,
+      "weight": 15,
+      "is_fragile": true,
+      "eta": 6
+    },
+    {
+      "id": "HeavyMachinerySpare",
+      "dimensions": [5, 8, 3],
+      "value": 310,
+      "weight": 85,
+      "is_fragile": false,
+      "eta": 7
+    },
+    {
+      "id": "WinterBlankets",
+      "dimensions": [4, 6, 2],
+      "value": 95,
+      "weight": 18,
+      "is_fragile": false,
+      "eta": 4
+    },
+    {
+      "id": "PorcelainTeaSet",
+      "dimensions": [3, 4, 2],
+      "value": 175,
+      "weight": 12,
+      "is_fragile": true,
+      "eta": 2
+    },
+    {
+      "id": "VeterinarySupplies",
+      "dimensions": [3, 5, 2],
+      "value": 160,
+      "weight": 20,
+      "is_fragile": false,
+      "eta": 1
+    },
+    {
+      "id": "SteelPlates",
+      "dimensions": [4, 10, 1],
+      "value": 220,
+      "weight": 90,
+      "is_fragile": false,
+      "eta": 5
+    },
+    {
+      "id": "HokkaidoButter",
+      "dimensions": [3, 3, 1],
+      "value": 65,
+      "weight": 9,
+      "is_fragile": false,
+      "eta": 3
+    },
+    {
+      "id": "GlassBottles",
+      "dimensions": [3, 4, 2],
+      "value": 130,
+      "weight": 16,
+      "is_fragile": true,
+      "eta": 2
+    },
+    {
+      "id": "HayBales",
+      "dimensions": [6, 8, 3],
+      "value": 140,
+      "weight": 50,
+      "is_fragile": false,
+      "eta": 4
+    },
+    {
+      "id": "TrainingBarbells",
+      "dimensions": [3, 6, 2],
+      "value": 190,
+      "weight": 70,
+      "is_fragile": false,
+      "eta": 5
+    },
+    {
+      "id": "SilkUniforms",
+      "dimensions": [3, 4, 1],
+      "value": 105,
+      "weight": 7,
+      "is_fragile": false,
+      "eta": 2
+    }
+  ]
+}
