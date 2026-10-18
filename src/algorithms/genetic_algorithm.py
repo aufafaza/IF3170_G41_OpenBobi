@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Optional, Callable, Any
 
 from ..models.box import Box, PlacedBox
 from ..models.container import Container
-from ..models.state import State, Placement, state_resolution, state_score_trig
+from ..models.state import State, Placement
 from .objective import default_objective_function, evaluate_fitness, OBJECTIVE_FUNCTIONS
 
 
@@ -176,8 +176,7 @@ class GeneticAlgorithm:
         decoded_state = State(
             container=self.container,
             boxes=self.boxes,
-            placed=placed,
-            spaces=[]
+            placed=placed
         )
         return decoded_state
 
@@ -400,6 +399,4 @@ class GeneticAlgorithm:
 __all__ = [
     "GeneticAlgorithm",
     "Chromosome",
-    "state_resolution",
-    "state_score_trig",
 ]

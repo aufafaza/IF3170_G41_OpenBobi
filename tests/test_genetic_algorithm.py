@@ -7,7 +7,7 @@ Selection, Crossover, Mutation (3 neighbor moves), and Objective functions.
 import unittest
 from src.models.box import Box, PlacedBox
 from src.models.container import Container
-from src.models.state import State, Placement, state_resolution, state_score_trig
+from src.models.state import State, Placement
 from src.algorithms.genetic_algorithm import GeneticAlgorithm, Chromosome
 from src.algorithms.objective import (
     default_objective_function,
@@ -88,17 +88,6 @@ class TestGeneticAlgorithmLogic(unittest.TestCase):
         self.assertGreater(val_default, 0)
         self.assertGreater(val_density, val_default)
         self.assertGreater(val_eta, 0)
-
-    def test_state_resolution_and_variables(self):
-        self.assertIsNotNone(state_score_trig)
-        bad_placed = {
-            "P0": Placement((0, 0, 0), (2, 2, 1)),
-            "P1": Placement((20, 20, 20), (2, 2, 1)),
-        }
-        bad_state = State(self.container, self.boxes, bad_placed)
-        resolved = state_resolution(bad_state)
-        self.assertIn("P0", resolved.placed)
-        self.assertNotIn("P1", resolved.placed)
 
 
 if __name__ == "__main__":

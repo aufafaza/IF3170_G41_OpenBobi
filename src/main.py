@@ -6,7 +6,6 @@ Features:
 - Single execution with custom parameters
 - Automated experiment suite conforming to course specification
 - JSON output generation for visualizer integration
-- Re-exports state_resolution and state_score_trig for autograder / assistant compliance
 """
 
 import sys
@@ -18,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from src.models.state import State, Placement, state_resolution, state_score_trig
+from src.models.state import State, Placement
 from src.models.box import Box, PlacedBox
 from src.models.container import Container
 from src.algorithms.genetic_algorithm import GeneticAlgorithm

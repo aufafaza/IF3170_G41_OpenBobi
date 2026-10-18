@@ -6,7 +6,6 @@ from .objective import (
     evaluate_fitness,
     OBJECTIVE_FUNCTIONS,
 )
-from ..models.state import state_resolution, state_score_trig
 
 __all__ = [
     "GeneticAlgorithm",
@@ -16,6 +15,4 @@ __all__ = [
     "eta_urgency_objective_function",
     "evaluate_fitness",
     "OBJECTIVE_FUNCTIONS",
-    "state_resolution",
-    "state_score_trig",
 ]
