@@ -1,4 +1,5 @@
 from .genetic_algorithm import GeneticAlgorithm, Chromosome
+from .hill_climbing import SteepestAscentHillClimbing
 from .objective import (
     default_objective_function,
     density_objective_function,
@@ -10,6 +11,7 @@ from .objective import (
 __all__ = [
     "GeneticAlgorithm",
     "Chromosome",
+    "SteepestAscentHillClimbing",
     "default_objective_function",
     "density_objective_function",
     "eta_urgency_objective_function",
