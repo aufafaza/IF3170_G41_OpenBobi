@@ -13,60 +13,424 @@ from .data import ALGORITHM_ORDER, ALGORITHMS, Dataset, Run, aggregate, load_dat
 from .scene import build_state_figure
 
 CSS = """
-:root{--ink:#17212b;--muted:#566570;--base:#eef1f2;--panel:#fbfcfc;--line:#c9d1d4;--ok:#1f6b45;--bad:#a4161a;color-scheme:light}
-*{box-sizing:border-box}
-body{margin:0;background:var(--base);color:var(--ink);font:15px/1.55 "Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
-.wrap{max-width:1360px;margin:0 auto;padding:0 28px}
-header.top{border-bottom:3px solid var(--ink);padding:26px 0 18px}
-header.top h1{margin:0 0 4px;font:700 30px/1.15 "Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;letter-spacing:-.015em}
-header.top p{margin:0;color:var(--muted)}
-.spec{display:flex;flex-wrap:wrap;gap:0;margin-top:16px;border:1px solid var(--line);background:var(--panel)}
-.spec div{padding:8px 18px;border-right:1px solid var(--line);min-width:150px}
-.spec div:last-child{border-right:0}
-.spec dt{font-size:12.5px;color:var(--muted)}
-.spec dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
-.warn{margin:14px 0 0;padding:10px 14px;border-left:4px solid var(--bad);background:#fdecea;font-size:14px}
-.warn ul{margin:4px 0 0;padding-left:20px}
-nav.tabs{display:flex;flex-wrap:wrap;gap:4px;margin-top:18px;border-bottom:1px solid var(--line)}
-.tab{appearance:none;background:none;border:0;border-bottom:4px solid transparent;margin-bottom:-1px;padding:10px 18px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
-.tab:hover{color:var(--ink)}
-.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent,var(--ink))}
-.tab:focus-visible,.pick select:focus-visible,tbody tr:focus-visible{outline:3px solid #1d6fa5;outline-offset:2px}
-main{padding:22px 0 60px}
-.panel[hidden]{display:none}
-.bar{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
-.bar h2{margin:0;font-size:22px;border-left:6px solid var(--accent,var(--ink));padding-left:12px}
-.pick{display:flex;flex-direction:column;font-size:13px;color:var(--muted);gap:3px}
-.pick select{font:inherit;color:var(--ink);padding:7px 10px;min-width:300px;background:#fff;border:1px solid var(--line)}
-.block{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--accent,var(--ink));padding:14px 16px 10px;margin-bottom:18px}
-.block h3{margin:0 0 4px;font-size:16px}
-.hint{margin:0 0 8px;color:var(--muted);font-size:13.5px}
-.badge{display:inline-block;padding:5px 12px;font-weight:600;font-size:14px;margin-bottom:6px}
-.badge.ok{background:#e3f2e9;color:var(--ok)}
-.badge.bad{background:#fdecea;color:var(--bad)}
-.issues{margin:4px 0 14px;padding-left:22px;color:var(--bad);font-size:14px}
-.metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:0;margin:8px 0 18px;border:1px solid var(--line);background:var(--panel)}
-.metrics div{padding:9px 14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
-.metrics dt{font-size:12.5px;color:var(--muted)}
-.metrics dd{margin:0;font-weight:600;font-size:16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.plot{width:100%}
-.plot.tall{min-height:620px}
-.empty{padding:34px 12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:18px}
-.tablewrap{overflow-x:auto}
-table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
-th,td{text-align:left;padding:7px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-th{font-weight:600;color:var(--muted);background:#f2f5f6}
-td.num,th.num{text-align:right}
-tbody tr[data-index]{cursor:pointer}
-tbody tr[data-index]:hover{background:#eef4f6}
-tbody tr.selected{background:#e1ecf0;box-shadow:inset 4px 0 0 var(--accent,var(--ink))}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-bottom:18px}
-.cards .block h3{border-left:6px solid var(--accent);padding-left:10px}
-.cards dl{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;margin:8px 0 6px}
-.cards dt{color:var(--muted)}
-.cards dd{margin:0;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
-@media (max-width:720px){.wrap{padding:0 14px}.grid{grid-template-columns:1fr}.pick select{min-width:0;width:100%}}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-sans: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.125rem;
+
+  --ink: #0f172a;
+  --muted: #475569;
+  --base: #f1f5f9;
+  --panel: #ffffff;
+  --line: #cbd5e1;
+  --ok: #0d7644;
+  --bad: #b91c1c;
+  --focus: #2563eb;
+  color-scheme: light;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: #cbd5e1;
+  color: var(--ink);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--base);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+body {
+  margin: 0;
+  background: var(--base);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.wrap {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 28px;
+}
+
+header.top {
+  border-bottom: 2px solid var(--line);
+  background: var(--panel);
+  padding: 32px 0 24px;
+}
+header.top h1 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+header.top p {
+  margin: 0;
+  font-size: var(--text-base);
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 68ch;
+}
+
+.spec {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-top: 20px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+}
+.spec div {
+  padding: 10px 18px;
+  border-right: 1px solid var(--line);
+  min-width: 150px;
+}
+.spec div:last-child {
+  border-right: 0;
+}
+.spec dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.spec dd {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.warn {
+  margin: 16px 0 0;
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  background: #fef2f2;
+  font-size: var(--text-sm);
+  color: var(--bad);
+  line-height: 1.5;
+}
+.warn strong {
+  font-weight: 700;
+}
+.warn ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}
+
+nav.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  padding: 12px 18px;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.tab:hover {
+  color: var(--ink);
+}
+.tab[aria-selected="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent, var(--ink));
+}
+.tab:focus-visible, .pick select:focus-visible, tbody tr:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+main {
+  padding: 24px 0 64px;
+}
+.panel[hidden] {
+  display: none;
+}
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.bar h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.pick {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--muted);
+  gap: 4px;
+}
+.pick select {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink);
+  padding: 8px 12px;
+  min-width: 320px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.block {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 18px 20px 14px;
+  margin-bottom: 20px;
+}
+.block h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.hint {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  max-width: 68ch;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+.badge.bad {
+  background: #fef2f2;
+  color: var(--bad);
+  border: 1px solid #fecaca;
+}
+.run-note {
+  margin: 0 0 12px;
+  font-size: var(--text-sm);
+  color: var(--muted);
+  line-height: 1.5;
+}
+.issues {
+  margin: 4px 0 16px;
+  padding-left: 22px;
+  color: var(--bad);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0;
+  margin: 10px 0 20px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+}
+.metrics div {
+  padding: 10px 16px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.metrics dt {
+  font-size: var(--text-xs);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.metrics dd {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: var(--text-md);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.plot {
+  width: 100%;
+}
+.plot.tall {
+  min-height: 620px;
+}
+.empty {
+  padding: 40px 16px;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+  gap: 20px;
+}
+
+.tablewrap {
+  overflow-x: auto;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-sm);
+  border: 1px solid var(--line);
+}
+th, td {
+  text-align: left;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+th {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  background: #f8fafc;
+}
+td.num, th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+tbody tr[data-index] {
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+tbody tr[data-index]:hover {
+  background: #f1f5f9;
+}
+tbody tr.selected {
+  background: #e2e8f0;
+  background: color-mix(in srgb, var(--accent, var(--ink)) 12%, #ffffff);
+  font-weight: 600;
+}
+tbody tr.selected:hover {
+  background: color-mix(in srgb, var(--accent, var(--ink)) 18%, #ffffff);
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.cards .block h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  padding-left: 0;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cards .block h3::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, var(--ink));
+}
+.cards dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 10px 0 4px;
+}
+.cards dt {
+  color: var(--muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+.cards dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .wrap { padding: 0 16px; }
+  .grid { grid-template-columns: 1fr; }
+  .pick select { min-width: 0; width: 100%; }
+  header.top h1 { font-size: var(--text-2xl); }
+}
 """
 
 JS = """
@@ -119,13 +483,11 @@ JS = """
 
     var badge = byId(key + "-badge");
     badge.replaceChildren();
-    var tag = document.createElement("span");
-    tag.className = "badge " + (run.issues.length ? "bad" : "ok");
-    tag.textContent = run.issues.length
-      ? "Ada " + run.issues.length + " masalah validasi"
-      : "Semua constraint terpenuhi dan catatan run konsisten (diverifikasi ulang dari file solusi)";
-    badge.appendChild(tag);
     if (run.issues.length) {
+      var tag = document.createElement("span");
+      tag.className = "badge bad";
+      tag.textContent = "Ada " + run.issues.length + " masalah validasi";
+      badge.appendChild(tag);
       var list = document.createElement("ul");
       list.className = "issues";
       run.issues.forEach(function (text) {
@@ -134,6 +496,11 @@ JS = """
         list.appendChild(item);
       });
       badge.appendChild(list);
+    } else {
+      var note = document.createElement("p");
+      note.className = "run-note";
+      note.textContent = "Catatan: Semua constraint terpenuhi dan catatan run konsisten (diverifikasi ulang dari file solusi)";
+      badge.appendChild(note);
     }
 
     draw(byId(key + "-state"), run.state, "File state awal/akhir untuk run ini tidak ditemukan.");
@@ -305,7 +672,7 @@ def _algorithm_panel(key: str, runs: List[Run], color: str) -> str:
     <p class="hint">Seret untuk memutar, scroll untuk zoom, arahkan kursor ke paket untuk detailnya. Paket di luar truk diletakkan di area sebelah kanan peti kemas.</p>
     <div class="plot tall" id="{key}-state"></div>
   </div>
-  <div class="grid" id="{key}-charts"></div>
+  <div id="{key}-charts"></div>
   <div class="block">
     <h3>Perbandingan semua run</h3>
     <div class="plot" id="{key}-overlay"></div>
@@ -366,6 +733,9 @@ def _overview_panel(dataset: Dataset, upper: Optional[float]) -> str:
     )
     return f"""
 <section class="panel" role="tabpanel" id="panel-overview" aria-labelledby="tab-overview">
+  <div class="bar">
+    <h2>Ringkasan Hasil Eksperimen</h2>
+  </div>
   <div class="cards">{''.join(cards)}</div>
   <div class="block"><div class="plot" id="overview-final"></div></div>
   <div class="block"><div class="plot" id="overview-duration"></div></div>

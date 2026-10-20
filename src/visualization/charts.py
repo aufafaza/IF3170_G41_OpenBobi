@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 
 from .data import ALGORITHMS, GroupStats, Run
 
-FONT = dict(family="Segoe UI, system-ui, sans-serif", size=12, color="#17212b")
+FONT = dict(family="'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", size=12, color="#0f172a")
 GRID = "#e3e7e8"
 MUTED = "#8d99ae"
 BOUND_COLOR = "#9b2226"

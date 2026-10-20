@@ -1,0 +1,475 @@
+{
+  "metadata": {},
+  "containers": [
+    {
+      "label": "MejiroExpress_Truck01",
+      "dimensions": [
+        10,
+        20,
+        5
+      ],
+      "max_capacity": 500
+    }
+  ],
+  "trucks_placed": {
+    "MejiroExpress_Truck01": {
+      "total_weight": 451,
+      "total_value": 2425,
+      "volume_utilized": 499,
+      "placed_packages": [
+        {
+          "id": "GlassBottles",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "dimensions": [
+            3,
+            2,
+            4
+          ],
+          "original_dimensions": [
+            3,
+            4,
+            2
+          ],
+          "orientation": "whl",
+          "value": 130,
+          "weight": 16,
+          "is_fragile": true,
+          "eta": 2
+        },
+        {
+          "id": "TrainerDocs",
+          "position": [
+            3,
+            0,
+            0
+          ],
+          "dimensions": [
+            2,
+            1,
+            3
+          ],
+          "original_dimensions": [
+            2,
+            3,
+            1
+          ],
+          "orientation": "whl",
+          "value": 50,
+          "weight": 3,
+          "is_fragile": false,
+          "eta": 1
+        },
+        {
+          "id": "RiceShowerBento",
+          "position": [
+            5,
+            0,
+            0
+          ],
+          "dimensions": [
+            1,
+            2,
+            2
+          ],
+          "original_dimensions": [
+            2,
+            2,
+            1
+          ],
+          "orientation": "hwl",
+          "value": 45,
+          "weight": 4,
+          "is_fragile": true,
+          "eta": 1
+        },
+        {
+          "id": "RusdiPackage",
+          "position": [
+            6,
+            0,
+            0
+          ],
+          "dimensions": [
+            1,
+            3,
+            4
+          ],
+          "original_dimensions": [
+            3,
+            4,
+            1
+          ],
+          "orientation": "hwl",
+          "value": 60,
+          "weight": 5,
+          "is_fragile": false,
+          "eta": 3
+        },
+        {
+          "id": "SpecialCarrotCrate",
+          "position": [
+            0,
+            2,
+            0
+          ],
+          "dimensions": [
+            4,
+            5,
+            2
+          ],
+          "original_dimensions": [
+            4,
+            5,
+            2
+          ],
+          "orientation": "wlh",
+          "value": 120,
+          "weight": 25,
+          "is_fragile": false,
+          "eta": 2
+        },
+        {
+          "id": "HeavyMachinerySpare",
+          "position": [
+            0,
+            7,
+            0
+          ],
+          "dimensions": [
+            8,
+            5,
+            3
+          ],
+          "original_dimensions": [
+            5,
+            8,
+            3
+          ],
+          "orientation": "lwh",
+          "value": 310,
+          "weight": 85,
+          "is_fragile": false,
+          "eta": 7
+        },
+        {
+          "id": "SilkUniforms",
+          "position": [
+            6,
+            3,
+            0
+          ],
+          "dimensions": [
+            4,
+            1,
+            3
+          ],
+          "original_dimensions": [
+            3,
+            4,
+            1
+          ],
+          "orientation": "lhw",
+          "value": 105,
+          "weight": 7,
+          "is_fragile": false,
+          "eta": 2
+        },
+        {
+          "id": "CrystalTrophy",
+          "position": [
+            7,
+            0,
+            0
+          ],
+          "dimensions": [
+            2,
+            2,
+            3
+          ],
+          "original_dimensions": [
+            2,
+            2,
+            3
+          ],
+          "orientation": "wlh",
+          "value": 200,
+          "weight": 15,
+          "is_fragile": true,
+          "eta": 6
+        },
+        {
+          "id": "HokkaidoButter",
+          "position": [
+            6,
+            4,
+            0
+          ],
+          "dimensions": [
+            3,
+            3,
+            1
+          ],
+          "original_dimensions": [
+            3,
+            3,
+            1
+          ],
+          "orientation": "wlh",
+          "value": 65,
+          "weight": 9,
+          "is_fragile": false,
+          "eta": 3
+        },
+        {
+          "id": "PorcelainTeaSet",
+          "position": [
+            4,
+            2,
+            0
+          ],
+          "dimensions": [
+            2,
+            4,
+            3
+          ],
+          "original_dimensions": [
+            3,
+            4,
+            2
+          ],
+          "orientation": "hlw",
+          "value": 175,
+          "weight": 12,
+          "is_fragile": true,
+          "eta": 2
+        },
+        {
+          "id": "SteelPlates",
+          "position": [
+            0,
+            12,
+            0
+          ],
+          "dimensions": [
+            10,
+            4,
+            1
+          ],
+          "original_dimensions": [
+            4,
+            10,
+            1
+          ],
+          "orientation": "lwh",
+          "value": 220,
+          "weight": 90,
+          "is_fragile": false,
+          "eta": 5
+        },
+        {
+          "id": "HokkaidoApples",
+          "position": [
+            0,
+            12,
+            1
+          ],
+          "dimensions": [
+            6,
+            5,
+            2
+          ],
+          "original_dimensions": [
+            5,
+            6,
+            2
+          ],
+          "orientation": "lwh",
+          "value": 180,
+          "weight": 40,
+          "is_fragile": false,
+          "eta": 5
+        },
+        {
+          "id": "McQueenSweets",
+          "position": [
+            8,
+            7,
+            0
+          ],
+          "dimensions": [
+            2,
+            3,
+            2
+          ],
+          "original_dimensions": [
+            2,
+            3,
+            2
+          ],
+          "orientation": "wlh",
+          "value": 85,
+          "weight": 8,
+          "is_fragile": true,
+          "eta": 1
+        },
+        {
+          "id": "TeioShoes",
+          "position": [
+            3,
+            1,
+            0
+          ],
+          "dimensions": [
+            2,
+            1,
+            4
+          ],
+          "original_dimensions": [
+            2,
+            4,
+            1
+          ],
+          "orientation": "whl",
+          "value": 70,
+          "weight": 6,
+          "is_fragile": false,
+          "eta": 2
+        },
+        {
+          "id": "VeterinarySupplies",
+          "position": [
+            0,
+            7,
+            3
+          ],
+          "dimensions": [
+            5,
+            3,
+            2
+          ],
+          "original_dimensions": [
+            3,
+            5,
+            2
+          ],
+          "orientation": "lwh",
+          "value": 160,
+          "weight": 20,
+          "is_fragile": false,
+          "eta": 1
+        },
+        {
+          "id": "TrainingBarbells",
+          "position": [
+            6,
+            12,
+            1
+          ],
+          "dimensions": [
+            3,
+            6,
+            2
+          ],
+          "original_dimensions": [
+            3,
+            6,
+            2
+          ],
+          "orientation": "wlh",
+          "value": 190,
+          "weight": 70,
+          "is_fragile": false,
+          "eta": 5
+        },
+        {
+          "id": "SpurtDrinkBoxes",
+          "position": [
+            6,
+            4,
+            1
+          ],
+          "dimensions": [
+            4,
+            2,
+            4
+          ],
+          "original_dimensions": [
+            4,
+            4,
+            2
+          ],
+          "orientation": "whl",
+          "value": 110,
+          "weight": 22,
+          "is_fragile": false,
+          "eta": 3
+        },
+        {
+          "id": "GoldShipGadgets",
+          "position": [
+            0,
+            2,
+            2
+          ],
+          "dimensions": [
+            3,
+            3,
+            2
+          ],
+          "original_dimensions": [
+            3,
+            3,
+            2
+          ],
+          "orientation": "wlh",
+          "value": 150,
+          "weight": 14,
+          "is_fragile": true,
+          "eta": 4
+        }
+      ]
+    }
+  },
+  "outside_packages": [
+    {
+      "id": "WinterBlankets",
+      "dimensions": [
+        4,
+        6,
+        2
+      ],
+      "original_dimensions": [
+        4,
+        6,
+        2
+      ],
+      "orientation": "wlh",
+      "value": 95,
+      "weight": 18,
+      "is_fragile": false,
+      "eta": 4
+    },
+    {
+      "id": "HayBales",
+      "dimensions": [
+        6,
+        8,
+        3
+      ],
+      "original_dimensions": [
+        6,
+        8,
+        3
+      ],
+      "orientation": "wlh",
+      "value": 140,
+      "weight": 50,
+      "is_fragile": false,
+      "eta": 4
+    }
+  ]
+}
