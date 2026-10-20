@@ -1,5 +1,11 @@
 from .genetic_algorithm import GeneticAlgorithm, Chromosome
-from .hill_climbing import SteepestAscentHillClimbing
+from .hill_climbing import (
+    HillClimbing,
+    SteepestAscentHillClimbing,
+    SidewaysHillClimbing,
+    StochasticHillClimbing,
+    RandomRestartHillClimbing,
+)
 from .simulated_annealing import SimulatedAnnealing
 from .objective import (
     default_objective_function,
@@ -12,7 +18,11 @@ from .objective import (
 __all__ = [
     "GeneticAlgorithm",
     "Chromosome",
+    "HillClimbing",
     "SteepestAscentHillClimbing",
+    "SidewaysHillClimbing",
+    "StochasticHillClimbing",
+    "RandomRestartHillClimbing",
     "SimulatedAnnealing",
     "default_objective_function",
     "density_objective_function",
