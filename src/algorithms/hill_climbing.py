@@ -21,15 +21,11 @@ class SteepestAscentHillClimbing(StateSpace):
 
         self.iterations: int = 0
         self.neighbors_evaluated: int = 0
-        self.sideways_moves: int = 0
         self.stopped_at_local_optimum: bool = False
         self.history_fitness: List[float] = []
         self.initial_state: Optional[State] = None
         self.final_state: Optional[State] = None
         self.search_duration: float = 0.0
-
-    def choose_move(self, scored: Scored) -> Optional[Tuple[float, State]]:
-        raise NotImplementedError
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
@@ -40,7 +36,6 @@ class SteepestAscentHillClimbing(StateSpace):
 
         self.iterations = 0
         self.neighbors_evaluated = 0
-        self.sideways_moves = 0
         self.stopped_at_local_optimum = False
         self.history_fitness = [current_f]
         if progress_callback:
@@ -55,8 +50,7 @@ class SteepestAscentHillClimbing(StateSpace):
                 if neighbor_f > best_f:
                     best_f, best_state = neighbor_f, neighbor
 
-            move = self.choose_move(scored)
-            if move is None:
+            if best_state is None:
                 self.stopped_at_local_optimum = True
                 break
 

@@ -17,7 +17,6 @@ from .objective import (
 __all__ = [
     "GeneticAlgorithm",
     "Chromosome",
-    "HillClimbing",
     "SteepestAscentHillClimbing",
     "SidewaysMoveHillClimbing",
     "StochasticHillClimbing",
