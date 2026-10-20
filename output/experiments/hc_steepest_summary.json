@@ -1,0 +1,94 @@
+{
+  "metadata": {
+    "algorithm": "Hill-climbing",
+    "container": {
+      "label": "MejiroExpress_Truck01",
+      "dimensions": [
+        10,
+        20,
+        5
+      ],
+      "max_capacity": 500
+    },
+    "total_packages": 20,
+    "total_runs": 3,
+    "objective": "default"
+  },
+  "runs": [
+    {
+      "run_id": 1,
+      "repetition": 1,
+      "seed": 101,
+      "group": "Steepest Ascent",
+      "initial_value": 2030.0,
+      "final_value": 2520.0,
+      "duration_seconds": 0.0718,
+      "iterations": 3,
+      "neighbors_evaluated": 1169,
+      "stopped_at_local_optimum": true,
+      "history_fitness": [
+        2030.0,
+        2340.0,
+        2425.0,
+        2520.0
+      ],
+      "max_iterations": 200,
+      "total_value": 2520,
+      "packages_placed": 19,
+      "volume_utilization": 54.7,
+      "weight_utilization": 93.8,
+      "initial_state_file": "solutions/hc_steepest_run1_initial.json",
+      "final_state_file": "solutions/hc_steepest_run1_final.json"
+    },
+    {
+      "run_id": 2,
+      "repetition": 2,
+      "seed": 102,
+      "group": "Steepest Ascent",
+      "initial_value": 2070.0,
+      "final_value": 2425.0,
+      "duration_seconds": 0.0581,
+      "iterations": 2,
+      "neighbors_evaluated": 678,
+      "stopped_at_local_optimum": true,
+      "history_fitness": [
+        2070.0,
+        2250.0,
+        2425.0
+      ],
+      "max_iterations": 200,
+      "total_value": 2425,
+      "packages_placed": 18,
+      "volume_utilization": 49.9,
+      "weight_utilization": 90.2,
+      "initial_state_file": "solutions/hc_steepest_run2_initial.json",
+      "final_state_file": "solutions/hc_steepest_run2_final.json"
+    },
+    {
+      "run_id": 3,
+      "repetition": 3,
+      "seed": 103,
+      "group": "Steepest Ascent",
+      "initial_value": 1810.0,
+      "final_value": 2520.0,
+      "duration_seconds": 0.1073,
+      "iterations": 4,
+      "neighbors_evaluated": 2244,
+      "stopped_at_local_optimum": true,
+      "history_fitness": [
+        1810.0,
+        2030.0,
+        2220.0,
+        2400.0,
+        2520.0
+      ],
+      "max_iterations": 200,
+      "total_value": 2520,
+      "packages_placed": 19,
+      "volume_utilization": 54.7,
+      "weight_utilization": 93.8,
+      "initial_state_file": "solutions/hc_steepest_run3_initial.json",
+      "final_state_file": "solutions/hc_steepest_run3_final.json"
+    }
+  ]
+}

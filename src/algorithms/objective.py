@@ -1,13 +1,6 @@
-"""
-Objective functions and fitness evaluation for the 3D Container Loading Problem.
-
-Supported objective functions:
-1. 'default': Pure total value of placed packages (standard specification).
-2. 'density': Value balanced with container volume utilization (Bonus specification).
-3. 'eta_urgency': Value weighted by delivery urgency / ETA (Bonus specification).
-"""
-
+import math
 from typing import Callable, Dict
+
 from ..models.state import State
 
 
@@ -22,12 +15,10 @@ def density_objective_function(state: State) -> float:
 
 
 def eta_urgency_objective_function(state: State) -> float:
-    score = 0.0
-    for label in state.placed:
-        box = state.boxes[label]
-        urgency_multiplier = 1.0 + (1.0 / (max(0, box.eta) + 1.0))
-        score += box.value * urgency_multiplier
-    return score
+    return math.fsum(
+        state.boxes[label].value * (1.0 + 1.0 / (max(0, state.boxes[label].eta) + 1.0))
+        for label in state.placed
+    )
 
 
 OBJECTIVE_FUNCTIONS: Dict[str, Callable[[State], float]] = {

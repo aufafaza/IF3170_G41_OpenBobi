@@ -8,30 +8,27 @@ from .objective import evaluate_fitness
 
 Vec = Tuple[int, int, int]
 
+state_score_trig: float = 0.0
 
 def _xy_overlap(p1: Vec, d1: Vec, p2: Vec, d2: Vec) -> bool:
     return (p1[0] < p2[0] + d2[0] and p2[0] < p1[0] + d1[0]
             and p1[1] < p2[1] + d2[1] and p2[1] < p1[1] + d1[1])
 
-
 def _overlap(p1: Vec, d1: Vec, p2: Vec, d2: Vec) -> bool:
     return _xy_overlap(p1, d1, p2, d2) and p1[2] < p2[2] + d2[2] and p2[2] < p1[2] + d1[2]
-
 
 def _point_order(point: Vec) -> Tuple[int, int, int]:
     return (point[2], point[1], point[0])
 
+def quarter_turns(dims: Vec) -> List[Vec]:
+    w, d, h = dims
+    options: List[Vec] = []
+    for candidate in ((d, w, h), (w, h, d), (h, d, w)):
+        if candidate != dims and candidate not in options:
+            options.append(candidate)
+    return options
 
 class StateSpace:
-    """
-    shared search space for the local search algorithms.
-
-    state: a State (which boxes are placed, where, and in which orientation).
-    every state generated here is feasible.
-
-    moves: ADD an outside box, REMOVE a placed box, MOVE a placed box,
-    SWAP a placed box for an outside box.
-    """
 
     def __init__(
         self,
@@ -49,13 +46,16 @@ class StateSpace:
     def f(self, state: State) -> float:
         return evaluate_fitness(state, self.objective_type)
 
-
     def _can_add(self, placed: Dict[str, Placement], weight: int,
                  label: str, pos: Vec, dims: Vec) -> bool:
         W, D, H = self.container.dimensions
         x, y, z = pos
         w, d, h = dims
         box = self.boxes[label]
+        if x < 0 or y < 0 or z < 0:
+            return False
+        if w <= 0 or d <= 0 or h <= 0:
+            return False
         if x + w > W or y + d > D or z + h > H:
             return False
         if weight + box.weight > self.container.max_capacity:
@@ -65,30 +65,82 @@ class StateSpace:
         for lbl, q in placed.items():
             if _overlap(pos, dims, q.position, q.dimensions):
                 return False
-            qz, qh = q.position[2], q.dimensions[2]
-            if qz + qh == z and _xy_overlap(pos, dims, q.position, q.dimensions):
+            if not _xy_overlap(pos, dims, q.position, q.dimensions):
+                continue
+            top = q.position[2] + q.dimensions[2]
+            if top <= z:
                 if self.boxes[lbl].is_fragile:
                     return False
-                supported = True
-            if box.is_fragile and qz == z + h and _xy_overlap(pos, dims, q.position, q.dimensions):
+                if top == z:
+                    supported = True
+            elif box.is_fragile:
                 return False
         return supported
 
     def _all_supported(self, placed: Dict[str, Placement]) -> bool:
-        for p in placed.values():
+        for lbl, p in placed.items():
             z = p.position[2]
-            if z == 0:
-                continue
-            ok = False
-            for lbl, q in placed.items():
-                if q.position[2] + q.dimensions[2] == z and _xy_overlap(
-                        p.position, p.dimensions, q.position, q.dimensions):
-                    if self.boxes[lbl].is_fragile:
+            ok = z == 0
+            for other, q in placed.items():
+                if other == lbl:
+                    continue
+                if not _xy_overlap(p.position, p.dimensions, q.position, q.dimensions):
+                    continue
+                top = q.position[2] + q.dimensions[2]
+                if top <= z:
+                    if self.boxes[other].is_fragile:
                         return False
-                    ok = True
+                    if top == z:
+                        ok = True
             if not ok:
                 return False
         return True
+
+    def _is_valid(self, placed: Dict[str, Placement]) -> bool:
+        W, D, H = self.container.dimensions
+        items = list(placed.items())
+        total_weight = 0
+        for lbl, p in items:
+            x, y, z = p.position
+            w, d, h = p.dimensions
+            if x < 0 or y < 0 or z < 0 or x + w > W or y + d > D or z + h > H:
+                return False
+            total_weight += self.boxes[lbl].weight
+        if total_weight > self.container.max_capacity:
+            return False
+        for i in range(len(items)):
+            a = items[i][1]
+            for j in range(i + 1, len(items)):
+                b = items[j][1]
+                if _overlap(a.position, a.dimensions, b.position, b.dimensions):
+                    return False
+        return self._all_supported(placed)
+
+    def _rotated_states(self, placed: Dict[str, Placement]) -> List[State]:
+        states: List[State] = []
+        for lbl, p in placed.items():
+            for dims in quarter_turns(p.dimensions):
+                new = dict(placed)
+                new[lbl] = Placement(p.position, dims)
+                if self._is_valid(new):
+                    states.append(State(self.container, self.boxes, new))
+        return states
+
+    def _exchanged_states(self, placed: Dict[str, Placement]) -> List[State]:
+        states: List[State] = []
+        labels = list(placed)
+        for i in range(len(labels)):
+            for j in range(i + 1, len(labels)):
+                a, b = labels[i], labels[j]
+                pa, pb = placed[a], placed[b]
+                if pa.position == pb.position:
+                    continue
+                new = dict(placed)
+                new[a] = Placement(pb.position, pa.dimensions)
+                new[b] = Placement(pa.position, pb.dimensions)
+                if self._is_valid(new):
+                    states.append(State(self.container, self.boxes, new))
+        return states
 
     def _points(self, placed: Dict[str, Placement]) -> List[Vec]:
         W, D, H = self.container.dimensions
@@ -99,7 +151,6 @@ class StateSpace:
                 if pt[0] < W and pt[1] < D and pt[2] < H:
                     pts.add(pt)
         return sorted(pts, key=_point_order)
-
 
     def generate_initial_state(self) -> State:
         placed: Dict[str, Placement] = {}
@@ -146,6 +197,8 @@ class StateSpace:
                             new[lbl] = Placement(pt, dims)
                             result.append(State(self.container, self.boxes, new))
 
+        result.extend(self._rotated_states(placed))
+        result.extend(self._exchanged_states(placed))
         return result
 
     def random_neighbor(self, state: State, max_tries: int = 50) -> Optional[State]:
@@ -153,7 +206,34 @@ class StateSpace:
         outside = state.outside
 
         for _ in range(max_tries):
-            move = self.rng.choice(["add", "remove", "move", "swap"])
+            move = self.rng.choice(["add", "remove", "move", "swap", "rotate", "exchange"])
+
+            if move == "rotate":
+                if not placed:
+                    continue
+                lbl = self.rng.choice(list(placed))
+                options = quarter_turns(placed[lbl].dimensions)
+                if not options:
+                    continue
+                new = dict(placed)
+                new[lbl] = Placement(placed[lbl].position, self.rng.choice(options))
+                if self._is_valid(new):
+                    return State(self.container, self.boxes, new)
+                continue
+
+            if move == "exchange":
+                if len(placed) < 2:
+                    continue
+                a, b = self.rng.sample(list(placed), 2)
+                pa, pb = placed[a], placed[b]
+                if pa.position == pb.position:
+                    continue
+                new = dict(placed)
+                new[a] = Placement(pb.position, pa.dimensions)
+                new[b] = Placement(pa.position, pb.dimensions)
+                if self._is_valid(new):
+                    return State(self.container, self.boxes, new)
+                continue
 
             if move == "add":
                 if not outside:
@@ -195,3 +275,11 @@ class StateSpace:
                 return State(self.container, self.boxes, new)
 
         return None
+
+def state_resolution(state: State, objective_type: str = "default") -> Tuple[bool, float]:
+    global state_score_trig
+    space = StateSpace(state.container, state.boxes, objective_type)
+    valid = space._is_valid(state.placed)
+    score = space.f(state) if valid else 0.0
+    state_score_trig = score
+    return valid, score

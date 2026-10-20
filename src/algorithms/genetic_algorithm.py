@@ -1,16 +1,12 @@
-
-
 import time
 import random
-import copy
-from dataclasses import dataclass, field
-from typing import List, Tuple, Dict, Optional, Callable, Any
+from dataclasses import dataclass
+from typing import List, Tuple, Dict, Optional, Callable
 
 from ..models.box import Box, PlacedBox
 from ..models.container import Container
 from ..models.state import State, Placement
-from .objective import default_objective_function, evaluate_fitness, OBJECTIVE_FUNCTIONS
-
+from .objective import evaluate_fitness
 
 @dataclass
 class Chromosome:
@@ -29,6 +25,10 @@ class Chromosome:
             decoded_state=self.decoded_state.copy() if self.decoded_state else None
         )
 
+def _xy_overlaps(cx: int, cy: int, w: int, d: int, other: PlacedBox) -> bool:
+    ox, oy, _ = other.position
+    ow, od, _ = other.dimensions
+    return max(cx, ox) < min(cx + w, ox + ow) and max(cy, oy) < min(cy + d, oy + od)
 
 class GeneticAlgorithm:
     def __init__(
@@ -67,6 +67,7 @@ class GeneticAlgorithm:
         self.final_state: Optional[State] = None
         self.best_chromosome: Optional[Chromosome] = None
         self.search_duration: float = 0.0
+        self.evaluations: int = 0
 
     def decode(self, chromosome: Chromosome) -> State:
         W, D, H = self.container.dimensions
@@ -108,39 +109,31 @@ class GeneticAlgorithm:
                 if collides:
                     continue
 
-                if cz == 0:
-                    best_candidate = (cx, cy, cz)
-                    break
-                else:
-                    has_support = False
-                    on_fragile = False
-
-                    for pb in placed_boxes_list:
-                        xj, yj, zj = pb.position
-                        wj, dj, hj = pb.dimensions
-
-                        if zj + hj == cz:
-                            xs = max(cx, xj)
-                            xe = min(cx + w, xj + wj)
-                            ys = max(cy, yj)
-                            ye = min(cy + d, yj + dj)
-
-                            if xs < xe and ys < ye:
-                                if pb.box.is_fragile:
-                                    on_fragile = True
-                                    break
-                                has_support = True
-
-                    if has_support and not on_fragile:
-                        best_candidate = (cx, cy, cz)
+                blocked = False
+                has_support = cz == 0
+                for pb in placed_boxes_list:
+                    if not _xy_overlaps(cx, cy, w, d, pb):
+                        continue
+                    top = pb.position[2] + pb.dimensions[2]
+                    if top <= cz:
+                        if pb.box.is_fragile:
+                            blocked = True
+                            break
+                        if top == cz:
+                            has_support = True
+                    elif box.is_fragile:
+                        blocked = True
                         break
+                if blocked or not has_support:
+                    continue
+
+                best_candidate = (cx, cy, cz)
+                break
 
             if best_candidate is not None:
                 px, py, pz = best_candidate
-                placement = Placement((px, py, pz), (w, d, h))
-                placed[label] = placement
-                placed_box = PlacedBox(box, (px, py, pz), (w, d, h))
-                placed_boxes_list.append(placed_box)
+                placed[label] = Placement((px, py, pz), (w, d, h))
+                placed_boxes_list.append(PlacedBox(box, (px, py, pz), (w, d, h)))
                 current_weight += box.weight
 
                 new_points = [
@@ -173,16 +166,12 @@ class GeneticAlgorithm:
                     if not (px <= pt[0] < px + w and py <= pt[1] < py + d and pz <= pt[2] < pz + h)
                 ]
 
-        decoded_state = State(
-            container=self.container,
-            boxes=self.boxes,
-            placed=placed
-        )
-        return decoded_state
+        return State(container=self.container, boxes=self.boxes, placed=placed)
 
     def evaluate(self, chromosome: Chromosome) -> float:
         if chromosome.fitness < 0.0 or chromosome.decoded_state is None:
             state = self.decode(chromosome)
+            self.evaluations += 1
             chromosome.decoded_state = state
             chromosome.fitness = evaluate_fitness(
                 state=state,
@@ -215,7 +204,7 @@ class GeneticAlgorithm:
             sampled = self.rng.sample(population, k)
             return max(sampled, key=lambda ind: ind.fitness)
 
-        elif self.selection_method == "rank":
+        if self.selection_method == "rank":
             sorted_pop = sorted(population, key=lambda ind: ind.fitness)
             n = len(sorted_pop)
             total_rank = (n * (n + 1)) // 2
@@ -227,18 +216,17 @@ class GeneticAlgorithm:
                     return ind
             return sorted_pop[-1]
 
-        else:
-            total_fitness = sum(ind.fitness for ind in population)
-            if total_fitness <= 0.0:
-                return self.rng.choice(population)
+        total_fitness = sum(ind.fitness for ind in population)
+        if total_fitness <= 0.0:
+            return self.rng.choice(population)
 
-            pick = self.rng.uniform(0, total_fitness)
-            current = 0.0
-            for ind in population:
-                current += ind.fitness
-                if current >= pick:
-                    return ind
-            return population[-1]
+        pick = self.rng.uniform(0, total_fitness)
+        current = 0.0
+        for ind in population:
+            current += ind.fitness
+            if current >= pick:
+                return ind
+        return population[-1]
 
     def crossover(self, parent1: Chromosome, parent2: Chromosome) -> Tuple[Chromosome, Chromosome]:
         if self.rng.random() > self.crossover_rate:
@@ -333,6 +321,7 @@ class GeneticAlgorithm:
 
     def run(self, progress_callback: Optional[Callable[[int, float, float], None]] = None) -> State:
         start_time = time.perf_counter()
+        self.evaluations = 0
 
         population = self.initialize_population()
         population.sort(key=lambda ind: ind.fitness, reverse=True)
@@ -394,7 +383,6 @@ class GeneticAlgorithm:
         self.final_state = self.best_chromosome.decoded_state.copy()
 
         return self.final_state
-
 
 __all__ = [
     "GeneticAlgorithm",

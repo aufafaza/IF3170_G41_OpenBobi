@@ -1,8 +1,7 @@
 from .genetic_algorithm import GeneticAlgorithm, Chromosome
 from .hill_climbing import (
-    HillClimbing,
     SteepestAscentHillClimbing,
-    SidewaysHillClimbing,
+    SidewaysMoveHillClimbing,
     StochasticHillClimbing,
     RandomRestartHillClimbing,
 )
@@ -20,7 +19,7 @@ __all__ = [
     "Chromosome",
     "HillClimbing",
     "SteepestAscentHillClimbing",
-    "SidewaysHillClimbing",
+    "SidewaysMoveHillClimbing",
     "StochasticHillClimbing",
     "RandomRestartHillClimbing",
     "SimulatedAnnealing",
