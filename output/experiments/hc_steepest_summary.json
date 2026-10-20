@@ -1,15 +1,17 @@
 {
   "metadata": {
     "algorithm": "Hill-climbing",
-    "container": {
-      "label": "MejiroExpress_Truck01",
-      "dimensions": [
-        10,
-        20,
-        5
-      ],
-      "max_capacity": 500
-    },
+    "containers": [
+      {
+        "label": "MejiroExpress_Truck01",
+        "dimensions": [
+          10,
+          20,
+          5
+        ],
+        "max_capacity": 500
+      }
+    ],
     "total_packages": 20,
     "total_runs": 3,
     "objective": "default"
@@ -21,22 +23,20 @@
       "seed": 101,
       "group": "Steepest Ascent",
       "initial_value": 2030.0,
-      "final_value": 2520.0,
-      "duration_seconds": 0.0718,
-      "iterations": 3,
-      "neighbors_evaluated": 1169,
+      "final_value": 2340.0,
+      "duration_seconds": 0.0213,
+      "iterations": 1,
+      "neighbors_evaluated": 533,
       "stopped_at_local_optimum": true,
       "history_fitness": [
         2030.0,
-        2340.0,
-        2425.0,
-        2520.0
+        2340.0
       ],
       "max_iterations": 200,
-      "total_value": 2520,
-      "packages_placed": 19,
-      "volume_utilization": 54.7,
-      "weight_utilization": 93.8,
+      "total_value": 2340,
+      "packages_placed": 18,
+      "volume_utilization": 48.7,
+      "weight_utilization": 85.8,
       "initial_state_file": "solutions/hc_steepest_run1_initial.json",
       "final_state_file": "solutions/hc_steepest_run1_final.json"
     },
@@ -47,9 +47,9 @@
       "group": "Steepest Ascent",
       "initial_value": 2070.0,
       "final_value": 2425.0,
-      "duration_seconds": 0.0581,
+      "duration_seconds": 0.0291,
       "iterations": 2,
-      "neighbors_evaluated": 678,
+      "neighbors_evaluated": 507,
       "stopped_at_local_optimum": true,
       "history_fitness": [
         2070.0,
@@ -70,23 +70,21 @@
       "seed": 103,
       "group": "Steepest Ascent",
       "initial_value": 1810.0,
-      "final_value": 2520.0,
-      "duration_seconds": 0.1073,
-      "iterations": 4,
-      "neighbors_evaluated": 2244,
+      "final_value": 2210.0,
+      "duration_seconds": 0.0336,
+      "iterations": 2,
+      "neighbors_evaluated": 1217,
       "stopped_at_local_optimum": true,
       "history_fitness": [
         1810.0,
         2030.0,
-        2220.0,
-        2400.0,
-        2520.0
+        2210.0
       ],
       "max_iterations": 200,
-      "total_value": 2520,
-      "packages_placed": 19,
-      "volume_utilization": 54.7,
-      "weight_utilization": 93.8,
+      "total_value": 2210,
+      "packages_placed": 18,
+      "volume_utilization": 42.7,
+      "weight_utilization": 76.8,
       "initial_state_file": "solutions/hc_steepest_run3_initial.json",
       "final_state_file": "solutions/hc_steepest_run3_final.json"
     }

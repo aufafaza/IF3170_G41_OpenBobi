@@ -1,13 +1,11 @@
 import json
 import os
 from typing import Any, Dict, List, Optional, Tuple
-
 from ..models.box import Box
 from ..models.container import Container
 from ..models.state import State
 
 AXIS_NAMES = "wlh"
-
 
 def orientation_code(original: Tuple[int, int, int], placed: Tuple[int, int, int]) -> Optional[str]:
     remaining = [0, 1, 2]
@@ -24,7 +22,6 @@ def orientation_code(original: Tuple[int, int, int], placed: Tuple[int, int, int
         code.append(AXIS_NAMES[chosen])
     return "".join(code)
 
-
 def _to_int(raw: Any, what: str, minimum: int) -> int:
     if isinstance(raw, bool) or not isinstance(raw, (int, float)):
         raise ValueError(f"{what} harus berupa bilangan bulat, ditemukan {raw!r}")
@@ -35,24 +32,27 @@ def _to_int(raw: Any, what: str, minimum: int) -> int:
         raise ValueError(f"{what} harus bernilai minimal {minimum}, ditemukan {value}")
     return value
 
-
 def _dimensions(raw: Any, what: str) -> Tuple[int, int, int]:
     if not isinstance(raw, (list, tuple)) or len(raw) != 3:
         raise ValueError(f"{what} harus berisi tepat 3 angka (w, l, h)")
     return tuple(_to_int(v, f"{what}[{i}]", 1) for i, v in enumerate(raw))
 
-
-def load_instance(filepath: str) -> Tuple[Container, Dict[str, Box]]:
+def load_instance(filepath: str) -> Tuple[List[Container], Dict[str, Box]]:
     with open(filepath, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     try:
-        truck_data = data["truck"]
-        container = Container(
-            label=str(truck_data.get("label", "Truck")),
-            dimensions=_dimensions(truck_data["dimensions"], "dimensi truk"),
-            max_capacity=_to_int(truck_data["max_capacity"], "max_capacity", 1),
-        )
+        containers = []
+        trucks_data = data.get("trucks")
+        if not trucks_data:
+            trucks_data = [data["truck"]]
+            
+        for t_data in trucks_data:
+            containers.append(Container(
+                label=str(t_data.get("label", "Truck")),
+                dimensions=_dimensions(t_data["dimensions"], "dimensi truk"),
+                max_capacity=_to_int(t_data["max_capacity"], "max_capacity", 1),
+            ))
 
         raw_packages = data["packages"]
         if not isinstance(raw_packages, list) or not raw_packages:
@@ -79,75 +79,71 @@ def load_instance(filepath: str) -> Tuple[Container, Dict[str, Box]]:
     except (TypeError, AttributeError) as exc:
         raise ValueError(f"struktur instance tidak valid ({exc})") from exc
 
-    return container, boxes
+    return containers, boxes
 
-
-def save_instance(filepath: str, container: Container, boxes: Dict[str, Box]) -> None:
+def save_instance(filepath: str, containers: List[Container], boxes: Dict[str, Box]) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     data = {
-        "truck": {
-            "label": container.label,
-            "dimensions": list(container.dimensions),
-            "max_capacity": container.max_capacity
-        },
+        "trucks": [
+            {"label": c.label, "dimensions": list(c.dimensions), "max_capacity": c.max_capacity}
+            for c in containers
+        ],
         "packages": [
-            {
-                "id": b.label,
-                "dimensions": list(b.dimensions),
-                "value": b.value,
-                "weight": b.weight,
-                "is_fragile": b.is_fragile,
-                "eta": b.eta
-            }
+            {"id": b.label, "dimensions": list(b.dimensions), "value": b.value, "weight": b.weight, "is_fragile": b.is_fragile, "eta": b.eta}
             for b in boxes.values()
         ]
     }
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2)
 
-
 def save_solution(filepath: str, state: State, metadata: Optional[Dict[str, Any]] = None) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
     solution_data = {
         "metadata": metadata or {},
-        "truck": {
-            "label": state.container.label,
-            "dimensions": list(state.container.dimensions),
-            "max_capacity": state.container.max_capacity,
-            "total_weight": state.total_weight,
-            "total_value": state.total_value,
-            "volume_utilized": state.volume_utilized,
-            "volume_utilization_ratio": round(state.volume_utilization_ratio * 100, 2),
-            "weight_utilization_ratio": round(state.weight_utilization_ratio * 100, 2),
-        },
-        "placed_packages": [
-            {
-                "id": label,
-                "position": list(placement.position),
-                "dimensions": list(placement.dimensions),
-                "original_dimensions": list(state.boxes[label].dimensions),
-                "orientation": orientation_code(state.boxes[label].dimensions, placement.dimensions),
-                "value": state.boxes[label].value,
-                "weight": state.boxes[label].weight,
-                "is_fragile": state.boxes[label].is_fragile,
-                "eta": state.boxes[label].eta,
-            }
-            for label, placement in state.placed.items()
+        "containers": [
+            {"label": c.label, "dimensions": list(c.dimensions), "max_capacity": c.max_capacity}
+            for c in state.containers
         ],
-        "outside_packages": [
-            {
-                "id": label,
-                "dimensions": list(state.boxes[label].dimensions),
-                "original_dimensions": list(state.boxes[label].dimensions),
-                "orientation": AXIS_NAMES,
-                "value": state.boxes[label].value,
-                "weight": state.boxes[label].weight,
-                "is_fragile": state.boxes[label].is_fragile,
-                "eta": state.boxes[label].eta,
-            }
-            for label in state.outside
-        ]
+        "trucks_placed": {}
     }
+
+    for truck in state.containers:
+        placed_in_truck = state.placed.get(truck.label, {})
+        total_w = sum(state.boxes[l].weight for l in placed_in_truck)
+        total_v = sum(state.boxes[l].value for l in placed_in_truck)
+        vol_used = sum(p.dimensions[0]*p.dimensions[1]*p.dimensions[2] for p in placed_in_truck.values())
+        
+        solution_data["trucks_placed"][truck.label] = {
+            "total_weight": total_w,
+            "total_value": total_v,
+            "volume_utilized": vol_used,
+            "placed_packages": [
+                {
+                    "id": label,
+                    "position": list(placement.position),
+                    "dimensions": list(placement.dimensions),
+                    "original_dimensions": list(state.boxes[label].dimensions),
+                    "orientation": orientation_code(state.boxes[label].dimensions, placement.dimensions),
+                    "value": state.boxes[label].value,
+                    "weight": state.boxes[label].weight,
+                    "is_fragile": state.boxes[label].is_fragile,
+                    "eta": state.boxes[label].eta,
+                } for label, placement in placed_in_truck.items()
+            ]
+        }
+
+    solution_data["outside_packages"] = [
+        {
+            "id": label,
+            "dimensions": list(state.boxes[label].dimensions),
+            "original_dimensions": list(state.boxes[label].dimensions),
+            "orientation": AXIS_NAMES,
+            "value": state.boxes[label].value,
+            "weight": state.boxes[label].weight,
+            "is_fragile": state.boxes[label].is_fragile,
+            "eta": state.boxes[label].eta,
+        } for label in state.outside
+    ]
 
     with open(filepath, "w", encoding="utf-8") as f:
         json.dump(solution_data, f, indent=2)

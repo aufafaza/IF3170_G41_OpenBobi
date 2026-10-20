@@ -18,7 +18,7 @@ class TestFragileOverhang(unittest.TestCase):
     def setUp(self):
         self.container = Container("T", (6, 6, 4), 100)
         self.boxes = make_boxes()
-        self.space = StateSpace(self.container, self.boxes)
+        self.space = StateSpace([self.container], self.boxes)
 
     def test_fragile_under_overhang_is_rejected(self):
         placed = {
@@ -26,7 +26,8 @@ class TestFragileOverhang(unittest.TestCase):
             "F": Placement((2, 0, 0), (2, 2, 1)),
             "X": Placement((0, 0, 2), (4, 2, 1)),
         }
-        self.assertFalse(self.space._is_valid(placed))
+        placed_all = {self.container.label: placed}
+        self.assertFalse(self.space._is_valid(placed_all))
         self.assertFalse(self.space._all_supported(placed))
 
     def test_overhang_without_fragile_is_accepted(self):
@@ -34,21 +35,22 @@ class TestFragileOverhang(unittest.TestCase):
             "T": Placement((0, 0, 0), (2, 2, 2)),
             "X": Placement((0, 0, 2), (4, 2, 1)),
         }
-        self.assertTrue(self.space._is_valid(placed))
+        placed_all = {self.container.label: placed}
+        self.assertTrue(self.space._is_valid(placed_all))
 
     def test_can_add_rejects_package_above_fragile_with_gap(self):
         placed = {
             "T": Placement((0, 0, 0), (2, 2, 2)),
             "F": Placement((2, 0, 0), (2, 2, 1)),
         }
-        self.assertFalse(self.space._can_add(placed, 2, "X", (0, 0, 2), (4, 2, 1)))
+        self.assertFalse(self.space._can_add(placed, 2, self.container, "X", (0, 0, 2), (4, 2, 1)))
 
     def test_can_add_rejects_fragile_below_existing_package(self):
         placed = {
             "T": Placement((0, 0, 0), (2, 2, 2)),
             "X": Placement((0, 0, 2), (4, 2, 1)),
         }
-        self.assertFalse(self.space._can_add(placed, 2, "F", (2, 0, 0), (2, 2, 1)))
+        self.assertFalse(self.space._can_add(placed, 2, self.container, "F", (2, 0, 0), (2, 2, 1)))
 
 class TestValidatorFragile(unittest.TestCase):
     def test_validator_flags_fragile_under_overhang(self):
@@ -70,8 +72,8 @@ class TestGeneticDecodeFragile(unittest.TestCase):
     def test_decoded_states_respect_fragile_rule(self):
         container = Container("T", (6, 6, 4), 100)
         boxes = make_boxes()
-        ga = GeneticAlgorithm(container, boxes, population_size=10, max_iterations=5, seed=3)
-        space = StateSpace(container, boxes)
+        ga = GeneticAlgorithm([container], boxes, population_size=10, max_iterations=5, seed=3)
+        space = StateSpace([container], boxes)
         for order in (["T", "F", "X"], ["T", "X", "F"], ["F", "T", "X"], ["X", "F", "T"]):
             chromosome = Chromosome(
                 order=order,

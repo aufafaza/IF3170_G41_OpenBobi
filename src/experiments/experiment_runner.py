@@ -32,7 +32,7 @@ def _calculate_stats(subset: List[Dict[str, Any]]) -> Dict[str, Any]:
     }
 
 def _run_once(
-    container: Container,
+    containers: List[Container],
     boxes: Dict[str, Box],
     output_dir: str,
     solutions_dir: str,
@@ -50,7 +50,7 @@ def _run_once(
     selection_method: str = "roulette",
 ) -> Dict[str, Any]:
     ga = GeneticAlgorithm(
-        container=container,
+        containers=containers,
         boxes=boxes,
         population_size=pop_size,
         max_iterations=iterations,
@@ -93,7 +93,7 @@ def _run_once(
         "evaluations": ga.evaluations,
         "volume_utilization": round(final_state.volume_utilization_ratio * 100, 2),
         "weight_utilization": round(final_state.weight_utilization_ratio * 100, 2),
-        "packages_placed": len(final_state.placed),
+        "packages_placed": sum(len(pkgs) for pkgs in final_state.placed.values()),
         "initial_state_file": os.path.relpath(init_sol_path, output_dir).replace(os.sep, "/") if init_sol_path else None,
         "final_state_file": os.path.relpath(final_sol_path, output_dir).replace(os.sep, "/"),
         "history_max": ga.history_max_fitness,
@@ -102,7 +102,7 @@ def _run_once(
     }
 
 def run_full_experiments(
-    container: Container,
+    containers: List[Container],
     boxes: Dict[str, Box],
     output_dir: str = "output",
     fixed_pop_control: int = 50,
@@ -133,7 +133,6 @@ def run_full_experiments(
     if verbose:
         print("\n" + "=" * 70)
         print("EXPERIMENT SET 1: POPULATION AS CONTROL")
-        print(f"Fixed Population Size = {fixed_pop_control}, Iteration Variations = {iter_variations}")
         print("=" * 70)
 
     for iters in iter_variations:
@@ -142,7 +141,7 @@ def run_full_experiments(
                 print(f"  [Exp 1] Pop={fixed_pop_control}, Iters={iters}, Run={rep}/{repetitions}...", end="", flush=True)
             seed = 1000 * fixed_pop_control + 10 * iters + rep
             record = _run_once(
-                container, boxes, output_dir, solutions_dir, run_counter,
+                containers, boxes, output_dir, solutions_dir, run_counter,
                 "Population Control", "exp1", fixed_pop_control, iters, rep, seed, objective_type,
                 crossover_rate, mutation_rate, elitism_count, selection_method,
             )
@@ -154,7 +153,6 @@ def run_full_experiments(
     if verbose:
         print("\n" + "=" * 70)
         print("EXPERIMENT SET 2: ITERATIONS AS CONTROL")
-        print(f"Fixed Iterations = {fixed_iter_control}, Population Variations = {pop_variations}")
         print("=" * 70)
 
     for pop in pop_variations:
@@ -163,7 +161,7 @@ def run_full_experiments(
                 print(f"  [Exp 2] Pop={pop}, Iters={fixed_iter_control}, Run={rep}/{repetitions}...", end="", flush=True)
             seed = 2000 * pop + 10 * fixed_iter_control + rep
             record = _run_once(
-                container, boxes, output_dir, solutions_dir, run_counter,
+                containers, boxes, output_dir, solutions_dir, run_counter,
                 "Iterations Control", "exp2", pop, fixed_iter_control, rep, seed, objective_type,
                 crossover_rate, mutation_rate, elitism_count, selection_method,
             )
@@ -175,24 +173,14 @@ def run_full_experiments(
     exp1_runs = [r for r in results if r["experiment_set"] == "Population Control"]
     exp2_runs = [r for r in results if r["experiment_set"] == "Iterations Control"]
 
-    exp1_aggregates = {
-        str(iters): _calculate_stats([r for r in exp1_runs if r["iterations"] == iters])
-        for iters in iter_variations
-    }
-    exp2_aggregates = {
-        str(pop): _calculate_stats([r for r in exp2_runs if r["pop_size"] == pop])
-        for pop in pop_variations
-    }
+    exp1_aggregates = {str(iters): _calculate_stats([r for r in exp1_runs if r["iterations"] == iters]) for iters in iter_variations}
+    exp2_aggregates = {str(pop): _calculate_stats([r for r in exp2_runs if r["pop_size"] == pop]) for pop in pop_variations}
 
     summary = {
         "metadata": {
             "algorithm": "Genetic Algorithm",
             "objective": objective_type,
-            "container": {
-                "label": container.label,
-                "dimensions": list(container.dimensions),
-                "max_capacity": container.max_capacity,
-            },
+            "containers": [{"label": c.label, "dimensions": list(c.dimensions), "max_capacity": c.max_capacity} for c in containers],
             "total_packages": len(boxes),
             "plot_color": "#386641",
             "total_runs": len(results),

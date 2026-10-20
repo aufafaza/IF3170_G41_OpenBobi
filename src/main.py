@@ -50,34 +50,35 @@ def print_banner():
 def get_instance(args):
     if args.generate:
         container, boxes = generate_instance(num_boxes=args.generate, seed=args.generate_seed)
-        save_instance(args.generate_output, container, boxes)
+        containers = [container] # Wrap in list for multi-truck compatibility
+        save_instance(args.generate_output, containers, boxes)
         args.input = args.generate_output
         print(f"[GENERATE] {len(boxes)} paket disimpan ke: {args.generate_output}")
-        return container, boxes
+        return containers, boxes
     return load_instance(args.input)
 
-def build_algorithm(args, container, boxes):
+def build_algorithm(args, containers, boxes):
     name = args.algorithm
     seed = args.seed
     objective = args.objective
     if name == "steepest":
-        return SteepestAscentHillClimbing(container, boxes, args.hc_iterations, objective, seed)
+        return SteepestAscentHillClimbing(containers, boxes, args.hc_iterations, objective, seed)
     if name == "sideways":
         return SidewaysMoveHillClimbing(
-            container, boxes, args.hc_iterations, args.max_sideways, objective, seed
+            containers, boxes, args.hc_iterations, args.max_sideways, objective, seed
         )
     if name == "stochastic":
-        return StochasticHillClimbing(container, boxes, args.hc_iterations * 3, 200, objective, seed)
+        return StochasticHillClimbing(containers, boxes, args.hc_iterations * 3, 200, objective, seed)
     if name == "restart":
         return RandomRestartHillClimbing(
-            container, boxes, args.max_restarts, args.hc_iterations, objective, seed
+            containers, boxes, args.max_restarts, args.hc_iterations, objective, seed
         )
     if name == "sa":
         return SimulatedAnnealing(
-            container, boxes, max_iterations=args.sa_iterations, objective_type=objective, seed=seed
+            containers, boxes, max_iterations=args.sa_iterations, objective_type=objective, seed=seed
         )
     return GeneticAlgorithm(
-        container=container,
+        containers=containers,
         boxes=boxes,
         population_size=args.pop_size,
         max_iterations=args.iterations,
@@ -134,20 +135,20 @@ def history_payload(name, algo):
     return {"history_fitness": algo.history_fitness}
 
 def run_single(args):
-    container, boxes = get_instance(args)
+    containers, boxes = get_instance(args)
     name = args.algorithm
     label = ALGORITHM_LABELS[name]
     print(f"\n[LOAD] Problem instance: {args.input}")
-    W, D, H = container.dimensions
-
-    print(f"[CONTAINER] {container.label} | Size: {W} x {D} x {H} | Max Capacity: {container.max_capacity} weight units")
+    
+    total_capacity = sum(c.max_capacity for c in containers)
+    print(f"[CONTAINER] {len(containers)} Truck(s) | Total Capacity: {total_capacity} weight units")
     print(f"[PACKAGES]  Total: {len(boxes)} | Objective Type: '{args.objective}'")
     print(f"[ALGORITHM] {label}")
     if name == "ga":
         print(f"[CONFIG]    Pop Size = {args.pop_size}, Iterations = {args.iterations}, Selection = {args.selection}")
     print()
 
-    algo = build_algorithm(args, container, boxes)
+    algo = build_algorithm(args, containers, boxes)
 
     def on_progress(gen, best_f, avg_f):
         if gen == 0 or gen % max(1, args.iterations // 10) == 0 or gen == args.iterations:
@@ -168,9 +169,8 @@ def run_single(args):
     print(f"Initial Objective Value: {initial_objective:g}")
     print(f"Final Objective Value  : {final_objective:g}")
     print(f"Final Package Value    : {final_state.total_value}")
-    print(f"Total Weight           : {final_state.total_weight} / {container.max_capacity} ({final_state.weight_utilization_ratio * 100:.1f}%)")
+    print(f"Total Weight           : {final_state.total_weight} / {total_capacity} ({final_state.weight_utilization_ratio * 100:.1f}%)")
     print(f"Volume Utilization     : {final_state.volume_utilization_ratio * 100:.1f}%")
-    print(f"Packages Inside Truck  : {len(final_state.placed)} packages")
     print(f"Packages Left Outside  : {len(final_state.outside)} packages")
     print(f"All Constraints Valid  : {'Yes' if valid else 'No'}")
     for key, value in algorithm_details(name, algo):
@@ -255,12 +255,12 @@ def main():
     run_ga = args.run_experiments or args.run_all
 
     if run_ls or run_ga:
-        container, boxes = get_instance(args)
+        containers, boxes = get_instance(args)
 
         if run_ls:
             print("[EXP] RUNNING HILL-CLIMBING AND SIMULATED ANNEALING EXPERIMENTS...")
             run_local_search_experiments(
-                container=container,
+                containers=containers,
                 boxes=boxes,
                 output_dir=args.output_dir,
                 repetitions=3,
@@ -275,7 +275,7 @@ def main():
         if run_ga:
             print("[EXP] RUNNING GENETIC ALGORITHM EXPERIMENT MATRIX (18 RUNS)...")
             run_full_experiments(
-                container=container,
+                containers=containers,
                 boxes=boxes,
                 output_dir=args.output_dir,
                 fixed_pop_control=args.pop_size,

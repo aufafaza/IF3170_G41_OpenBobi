@@ -1,0 +1,16 @@
+{
+  "trucks": [
+    { "label": "Truck_A", "dimensions": [10, 20, 5], "max_capacity": 300 },
+    { "label": "Truck_B", "dimensions": [8, 15, 4], "max_capacity": 250 }
+  ],
+  "packages": [
+    { "id": "RusdiPackage", "dimensions": [3, 4, 1], "value": 60, "weight": 5, "is_fragile": false, "eta": 3 },
+    { "id": "McQueenSweets", "dimensions": [2, 3, 2], "value": 85, "weight": 8, "is_fragile": true, "eta": 1 },
+    { "id": "SpecialCarrotCrate", "dimensions": [4, 5, 2], "value": 120, "weight": 25, "is_fragile": false, "eta": 2 },
+    { "id": "GoldShipGadgets", "dimensions": [3, 3, 2], "value": 150, "weight": 14, "is_fragile": true, "eta": 4 },
+    { "id": "CrystalTrophy", "dimensions": [2, 2, 3], "value": 200, "weight": 15, "is_fragile": true, "eta": 6 },
+    { "id": "HeavyMachinerySpare", "dimensions": [5, 8, 3], "value": 310, "weight": 85, "is_fragile": false, "eta": 7 },
+    { "id": "TrainingBarbells", "dimensions": [3, 6, 2], "value": 190, "weight": 70, "is_fragile": false, "eta": 5 },
+    { "id": "SteelPlates", "dimensions": [4, 10, 1], "value": 220, "weight": 90, "is_fragile": false, "eta": 5 }
+  ]
+}

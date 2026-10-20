@@ -15,6 +15,11 @@ Algoritma yang diimplementasikan:
 
 Objective function tersedia: `default` (total value), `density`, dan `eta_urgency`.
 
+**Fitur Bonus yang Diimplementasikan:**
+- **Objective Alternatif**: `density` dan `eta_urgency`.
+- **Seluruh Varian Hill-Climbing**: Steepest, Sideways, Stochastic, dan Random Restart.
+- **Multi-Truk**: Program dapat menerima lebih dari satu peti kemas (truk) dan mendistribusikan paket untuk memaksimalkan total value armada.
+
 Fungsi `state_resolution(state, objective_type)` di `src/algorithms/state_space.py` memeriksa seluruh constraint sebuah state dan mengembalikan pasangan (valid, skor). Variabel `state_score_trig` di modul yang sama menyimpan skor hasil pemanggilan terakhir fungsi tersebut.
 
 ## Struktur Repository
@@ -66,10 +71,16 @@ Seluruh eksperimen Genetic Algorithm (variasi iterasi dan variasi populasi, masi
 python -m src.main --run-experiments
 ```
 
-Semua eksperimen sekaligus:
+Semua eksperimen sekaligus (pada instance single-truk bawaan):
 
 ```
 python -m src.main --run-all
+```
+
+Menjalankan eksperimen pada instance Multi-Truk (Bonus):
+
+```
+python -m src.main -i data/multi_truck.json --run-all -o output/multi_truck
 ```
 
 Objective function alternatif, simpan ke folder terpisah:
@@ -103,6 +114,8 @@ Perintah ini membuat `output/dashboard.html` yang menampilkan state awal dan akh
 
 Folder `output/` berisi `experiments/` (ringkasan JSON tiap algoritma), `solutions/` (state awal dan akhir tiap run), dan `dashboard.html`. Buka `dashboard.html` langsung di browser, tanpa server.
 
+*(Catatan: Untuk visualisasi Multi-Truk, dashboard akan menampilkan state 3D dari truk pertama. Data lengkap seluruh truk tetap tersimpan di file JSON solusi).*
+
 ## Pengujian
 
 ```
@@ -123,15 +136,18 @@ Beberapa keputusan implementasi yang perlu diketahui untuk membaca hasil eksperi
 
 - **Kinerja enumerasi neighbor Hill-climbing.** Varian Steepest Ascent dan Sideways Move mengevaluasi seluruh neighbor lengkap per iterasi (enumerasi swap, move, rotate, exchange). Untuk instance 20 paket seperti `mejiro_express.json`, ini menghasilkan ribuan neighbor per iterasi sehingga lebih lambat dari Stochastic HC dan SA yang memakai `random_neighbor`. Perbedaan durasi ini tercatat otomatis pada output eksperimen dan divisualisasikan di dashboard.
 
+- **Arsitektur Multi-Truk.** Atribut `containers` pada objek `State` berupa *list* untuk menampung lebih dari satu kontainer. Seluruh constraint (berat, tidak melayang, fragile) divalidasi secara independen per kontainer. Algoritma GA dan Local Search menempatkan paket dengan mengecek ketersediaan ruang di setiap truk secara berurutan.
+
 ## Format Input dan Syarat Validitas
 
-Program menerima satu file JSON per instance dengan struktur berikut.
+Program menerima satu file JSON per instance. Untuk **single-truk**, gunakan format `"truck": {...}`. Untuk **multi-truk (bonus)**, gunakan format `"trucks": [{...}, {...}]`.
 
 | Field | Tipe | Aturan validitas |
 |---|---|---|
-| `truck.label` | string | bebas, tidak kosong |
-| `truck.dimensions` | `[int, int, int]` | masing-masing ≥ 1, bilangan bulat (w, l, h) |
-| `truck.max_capacity` | int | ≥ 1, dalam satuan berat |
+| `truck` atau `trucks` | objek atau list | Wajib ada salah satu. Jika `trucks`, berisi list objek truk. |
+| `*.label` | string | bebas, tidak kosong |
+| `*.dimensions` | `[int, int, int]` | masing-masing ≥ 1, bilangan bulat (w, l, h) |
+| `*.max_capacity` | int | ≥ 1, dalam satuan berat |
 | `packages` | list | tidak kosong |
 | `packages[].id` | string | unik dalam satu instance |
 | `packages[].dimensions` | `[int, int, int]` | masing-masing ≥ 1 |

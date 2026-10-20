@@ -33,7 +33,7 @@ def _xy_overlaps(cx: int, cy: int, w: int, d: int, other: PlacedBox) -> bool:
 class GeneticAlgorithm:
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         population_size: int = 50,
         max_iterations: int = 100,
@@ -44,7 +44,7 @@ class GeneticAlgorithm:
         objective_type: str = "default",
         seed: Optional[int] = None
     ):
-        self.container = container
+        self.containers = containers
         self.boxes = boxes
         self.box_keys = list(boxes.keys())
         self.population_size = max(4, population_size)
@@ -70,113 +70,103 @@ class GeneticAlgorithm:
         self.evaluations: int = 0
 
     def decode(self, chromosome: Chromosome) -> State:
-        W, D, H = self.container.dimensions
-        max_cap = self.container.max_capacity
-
-        placed: Dict[str, Placement] = {}
-        placed_boxes_list: List[PlacedBox] = []
-        current_weight = 0
-
-        candidates: List[Tuple[int, int, int]] = [(0, 0, 0)]
+        state = State(self.containers, self.boxes)
+        
+        candidates_per_truck = {t.label: [(0,0,0)] for t in self.containers}
+        placed_boxes_per_truck = {t.label: [] for t in self.containers}
+        current_weight_per_truck = {t.label: 0 for t in self.containers}
 
         for label in chromosome.order:
             if not chromosome.inclusions.get(label, True):
                 continue
 
             box = self.boxes[label]
-            if current_weight + box.weight > max_cap:
-                continue
-
             rot_list = self.box_rotations[label]
             rot_idx = chromosome.rotations.get(label, 0) % len(rot_list)
             w, d, h = rot_list[rot_idx]
 
-            best_candidate: Optional[Tuple[int, int, int]] = None
-
-            candidates.sort(key=lambda pt: (pt[2], pt[1], pt[0]))
-
-            for cx, cy, cz in candidates:
-                if cx + w > W or cy + d > D or cz + h > H:
+            placed_success = False
+            for truck in self.containers:
+                if current_weight_per_truck[truck.label] + box.weight > truck.max_capacity:
                     continue
+                
+                W, D, H = truck.dimensions
+                candidates = candidates_per_truck[truck.label]
+                placed_boxes_list = placed_boxes_per_truck[truck.label]
+                candidates.sort(key=lambda pt: (pt[2], pt[1], pt[0]))
 
-                candidate_box = PlacedBox(box, (cx, cy, cz), (w, d, h))
-
-                collides = False
-                for pb in placed_boxes_list:
-                    if candidate_box.check_overlap(pb):
-                        collides = True
-                        break
-                if collides:
-                    continue
-
-                blocked = False
-                has_support = cz == 0
-                for pb in placed_boxes_list:
-                    if not _xy_overlaps(cx, cy, w, d, pb):
+                best_candidate: Optional[Tuple[int, int, int]] = None
+                for cx, cy, cz in candidates:
+                    if cx + w > W or cy + d > D or cz + h > H:
                         continue
-                    top = pb.position[2] + pb.dimensions[2]
-                    if top <= cz:
-                        if pb.box.is_fragile:
+
+                    candidate_box = PlacedBox(box, (cx, cy, cz), (w, d, h))
+                    if any(candidate_box.check_overlap(pb) for pb in placed_boxes_list):
+                        continue
+
+                    blocked = False
+                    has_support = cz == 0
+                    for pb in placed_boxes_list:
+                        if not _xy_overlaps(cx, cy, w, d, pb):
+                            continue
+                        top = pb.position[2] + pb.dimensions[2]
+                        if top <= cz:
+                            if pb.box.is_fragile:
+                                blocked = True
+                                break
+                            if top == cz:
+                                has_support = True
+                        elif box.is_fragile:
                             blocked = True
                             break
-                        if top == cz:
-                            has_support = True
-                    elif box.is_fragile:
-                        blocked = True
-                        break
-                if blocked or not has_support:
-                    continue
+                    if blocked or not has_support:
+                        continue
 
-                best_candidate = (cx, cy, cz)
-                break
+                    best_candidate = (cx, cy, cz)
+                    break
 
-            if best_candidate is not None:
-                px, py, pz = best_candidate
-                placed[label] = Placement((px, py, pz), (w, d, h))
-                placed_boxes_list.append(PlacedBox(box, (px, py, pz), (w, d, h)))
-                current_weight += box.weight
+                if best_candidate is not None:
+                    px, py, pz = best_candidate
+                    state.placed[truck.label][label] = Placement((px, py, pz), (w, d, h))
+                    placed_boxes_list.append(PlacedBox(box, (px, py, pz), (w, d, h)))
+                    current_weight_per_truck[truck.label] += box.weight
 
-                new_points = [
-                    (px + w, py, pz),
-                    (px, py + d, pz),
-                ]
-                if not box.is_fragile and pz + h < H:
-                    new_points.append((px, py, pz + h))
+                    new_points = [(px + w, py, pz), (px, py + d, pz)]
+                    if not box.is_fragile and pz + h < H:
+                        new_points.append((px, py, pz + h))
 
-                for pb in placed_boxes_list[:-1]:
-                    if pb.position[2] + pb.dimensions[2] == pz:
-                        new_points.append((px + w, pb.position[1], pz))
-                        new_points.append((pb.position[0], py + d, pz))
+                    for pb in placed_boxes_list[:-1]:
+                        if pb.position[2] + pb.dimensions[2] == pz:
+                            new_points.extend([(px + w, pb.position[1], pz), (pb.position[0], py + d, pz)])
 
-                existing_set = set(candidates)
-                for nx, ny, nz in new_points:
-                    if nx < W and ny < D and nz < H and (nx, ny, nz) not in existing_set:
-                        inside_any = any(
-                            pb.position[0] <= nx < pb.position[0] + pb.dimensions[0] and
-                            pb.position[1] <= ny < pb.position[1] + pb.dimensions[1] and
-                            pb.position[2] <= nz < pb.position[2] + pb.dimensions[2]
-                            for pb in placed_boxes_list
-                        )
-                        if not inside_any:
-                            candidates.append((nx, ny, nz))
-                            existing_set.add((nx, ny, nz))
+                    existing_set = set(candidates)
+                    for nx, ny, nz in new_points:
+                        if nx < W and ny < D and nz < H and (nx, ny, nz) not in existing_set:
+                            inside_any = any(
+                                pb.position[0] <= nx < pb.position[0] + pb.dimensions[0] and
+                                pb.position[1] <= ny < pb.position[1] + pb.dimensions[1] and
+                                pb.position[2] <= nz < pb.position[2] + pb.dimensions[2]
+                                for pb in placed_boxes_list
+                            )
+                            if not inside_any:
+                                candidates.append((nx, ny, nz))
+                                existing_set.add((nx, ny, nz))
 
-                candidates = [
-                    pt for pt in candidates
-                    if not (px <= pt[0] < px + w and py <= pt[1] < py + d and pz <= pt[2] < pz + h)
-                ]
-
-        return State(container=self.container, boxes=self.boxes, placed=placed)
+                    candidates_per_truck[truck.label] = [
+                        pt for pt in candidates
+                        if not (px <= pt[0] < px + w and py <= pt[1] < py + d and pz <= pt[2] < pz + h)
+                    ]
+                    placed_success = True
+                    break 
+                    
+        return state
 
     def evaluate(self, chromosome: Chromosome) -> float:
         if chromosome.fitness < 0.0 or chromosome.decoded_state is None:
             state = self.decode(chromosome)
             self.evaluations += 1
             chromosome.decoded_state = state
-            chromosome.fitness = evaluate_fitness(
-                state=state,
-                objective_type=self.objective_type
-            )
+            chromosome.fitness = evaluate_fitness(state=state, objective_type=self.objective_type)
         return chromosome.fitness
 
     def create_random_chromosome(self) -> Chromosome:
@@ -255,10 +245,7 @@ class GeneticAlgorithm:
         child1_order = order_crossover_helper(parent1.order, parent2.order)
         child2_order = order_crossover_helper(parent2.order, parent1.order)
 
-        child1_rots = {}
-        child2_rots = {}
-        child1_inc = {}
-        child2_inc = {}
+        child1_rots, child2_rots, child1_inc, child2_inc = {}, {}, {}, {}
 
         for lbl in self.box_keys:
             if self.rng.random() < 0.5:
@@ -287,17 +274,10 @@ class GeneticAlgorithm:
 
         if move_choice == 1 and n >= 2:
             idx1, idx2 = self.rng.sample(range(n), 2)
-            chromosome.order[idx1], chromosome.order[idx2] = (
-                chromosome.order[idx2],
-                chromosome.order[idx1]
-            )
+            chromosome.order[idx1], chromosome.order[idx2] = chromosome.order[idx2], chromosome.order[idx1]
             if self.rng.random() < 0.5:
                 lbl1, lbl2 = chromosome.order[idx1], chromosome.order[idx2]
-                chromosome.inclusions[lbl1], chromosome.inclusions[lbl2] = (
-                    chromosome.inclusions[lbl2],
-                    chromosome.inclusions[lbl1]
-                )
-
+                chromosome.inclusions[lbl1], chromosome.inclusions[lbl2] = chromosome.inclusions[lbl2], chromosome.inclusions[lbl1]
         elif move_choice == 2:
             if self.rng.random() < 0.5 and n >= 2:
                 src_idx = self.rng.randint(0, n - 1)
@@ -307,7 +287,6 @@ class GeneticAlgorithm:
             else:
                 target_lbl = self.rng.choice(self.box_keys)
                 chromosome.inclusions[target_lbl] = not chromosome.inclusions.get(target_lbl, True)
-
         elif move_choice == 3:
             target_lbl = self.rng.choice(self.box_keys)
             n_rots = len(self.box_rotations[target_lbl])

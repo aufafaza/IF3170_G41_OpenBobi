@@ -1,0 +1,228 @@
+{
+  "metadata": {
+    "algorithm": "Hill-climbing",
+    "state": "final",
+    "run": "hc_restart_run3"
+  },
+  "containers": [
+    {
+      "label": "Truck_A",
+      "dimensions": [
+        10,
+        20,
+        5
+      ],
+      "max_capacity": 300
+    },
+    {
+      "label": "Truck_B",
+      "dimensions": [
+        8,
+        15,
+        4
+      ],
+      "max_capacity": 250
+    }
+  ],
+  "trucks_placed": {
+    "Truck_A": {
+      "total_weight": 284,
+      "total_value": 990,
+      "volume_utilized": 254,
+      "placed_packages": [
+        {
+          "id": "SteelPlates",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "dimensions": [
+            1,
+            10,
+            4
+          ],
+          "original_dimensions": [
+            4,
+            10,
+            1
+          ],
+          "orientation": "hlw",
+          "value": 220,
+          "weight": 90,
+          "is_fragile": false,
+          "eta": 5
+        },
+        {
+          "id": "SpecialCarrotCrate",
+          "position": [
+            1,
+            0,
+            0
+          ],
+          "dimensions": [
+            4,
+            2,
+            5
+          ],
+          "original_dimensions": [
+            4,
+            5,
+            2
+          ],
+          "orientation": "whl",
+          "value": 120,
+          "weight": 25,
+          "is_fragile": false,
+          "eta": 2
+        },
+        {
+          "id": "HeavyMachinerySpare",
+          "position": [
+            0,
+            10,
+            0
+          ],
+          "dimensions": [
+            8,
+            3,
+            5
+          ],
+          "original_dimensions": [
+            5,
+            8,
+            3
+          ],
+          "orientation": "lhw",
+          "value": 310,
+          "weight": 85,
+          "is_fragile": false,
+          "eta": 7
+        },
+        {
+          "id": "GoldShipGadgets",
+          "position": [
+            5,
+            0,
+            0
+          ],
+          "dimensions": [
+            3,
+            2,
+            3
+          ],
+          "original_dimensions": [
+            3,
+            3,
+            2
+          ],
+          "orientation": "whl",
+          "value": 150,
+          "weight": 14,
+          "is_fragile": true,
+          "eta": 4
+        },
+        {
+          "id": "TrainingBarbells",
+          "position": [
+            1,
+            2,
+            0
+          ],
+          "dimensions": [
+            3,
+            6,
+            2
+          ],
+          "original_dimensions": [
+            3,
+            6,
+            2
+          ],
+          "orientation": "wlh",
+          "value": 190,
+          "weight": 70,
+          "is_fragile": false,
+          "eta": 5
+        }
+      ]
+    },
+    "Truck_B": {
+      "total_weight": 28,
+      "total_value": 345,
+      "volume_utilized": 36,
+      "placed_packages": [
+        {
+          "id": "McQueenSweets",
+          "position": [
+            0,
+            0,
+            0
+          ],
+          "dimensions": [
+            2,
+            2,
+            3
+          ],
+          "original_dimensions": [
+            2,
+            3,
+            2
+          ],
+          "orientation": "whl",
+          "value": 85,
+          "weight": 8,
+          "is_fragile": true,
+          "eta": 1
+        },
+        {
+          "id": "CrystalTrophy",
+          "position": [
+            2,
+            0,
+            0
+          ],
+          "dimensions": [
+            2,
+            2,
+            3
+          ],
+          "original_dimensions": [
+            2,
+            2,
+            3
+          ],
+          "orientation": "wlh",
+          "value": 200,
+          "weight": 15,
+          "is_fragile": true,
+          "eta": 6
+        },
+        {
+          "id": "RusdiPackage",
+          "position": [
+            2,
+            2,
+            0
+          ],
+          "dimensions": [
+            3,
+            1,
+            4
+          ],
+          "original_dimensions": [
+            3,
+            4,
+            1
+          ],
+          "orientation": "whl",
+          "value": 60,
+          "weight": 5,
+          "is_fragile": false,
+          "eta": 3
+        }
+      ]
+    }
+  },
+  "outside_packages": []
+}

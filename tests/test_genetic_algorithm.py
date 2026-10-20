@@ -25,7 +25,7 @@ class TestGeneticAlgorithmLogic(unittest.TestCase):
             for i in range(8)
         }
         self.ga = GeneticAlgorithm(
-            container=self.container,
+            containers=[self.container],
             boxes=self.boxes,
             population_size=10,
             max_iterations=10,
@@ -80,7 +80,8 @@ class TestGeneticAlgorithmLogic(unittest.TestCase):
             "P0": Placement((0, 0, 0), (2, 2, 1)),
             "P1": Placement((2, 0, 0), (2, 2, 1)),
         }
-        test_state = State(self.container, self.boxes, placed)
+        test_state = State([self.container], self.boxes, {self.container.label: placed})
+        
         val_default = default_objective_function(test_state)
         val_density = density_objective_function(test_state)
         val_eta = eta_urgency_objective_function(test_state)

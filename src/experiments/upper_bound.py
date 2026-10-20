@@ -6,10 +6,8 @@ from ..utils.data_loader import load_instance
 
 Item = Tuple[float, float, float]
 
-
 class _NodeLimit(Exception):
     pass
-
 
 def _fractional_bound(items: List[Item], index: int, capacity: float) -> float:
     bound = 0.0
@@ -22,7 +20,6 @@ def _fractional_bound(items: List[Item], index: int, capacity: float) -> float:
             bound += value * remaining / weight
             break
     return bound
-
 
 def bound_from_items(
     items: Iterable[Item],
@@ -61,12 +58,12 @@ def bound_from_items(
         return math.floor(root + 1e-9) if math.isfinite(root) else root
     return best
 
-
 def upper_bound(path: str) -> float:
-    container, boxes = load_instance(path)
+    containers, boxes = load_instance(path)
     items = [(b.value, b.weight, b.volume()) for b in boxes.values()]
-    return bound_from_items(items, container.max_capacity, container.volume())
-
+    total_capacity = sum(c.max_capacity for c in containers)
+    total_volume = sum(c.volume() for c in containers)
+    return bound_from_items(items, total_capacity, total_volume)
 
 if __name__ == "__main__":
     target = sys.argv[1] if len(sys.argv) > 1 else "data/mejiro_express.json"

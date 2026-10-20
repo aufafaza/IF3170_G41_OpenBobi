@@ -9,7 +9,6 @@ from src.algorithms.state_space import StateSpace, quarter_turns
 from src.utils.data_loader import load_instance, orientation_code
 from src.visualization.data import PackageView, StateView, recompute_objective, validate_state
 
-
 class TestQuarterTurns(unittest.TestCase):
     def test_distinct_dimensions(self):
         self.assertEqual(set(quarter_turns((2, 3, 4))), {(3, 2, 4), (2, 4, 3), (4, 3, 2)})
@@ -21,28 +20,27 @@ class TestQuarterTurns(unittest.TestCase):
         self.assertEqual(set(quarter_turns((2, 2, 3))), {(2, 3, 2), (3, 2, 2)})
 
     def test_rotated_states_swap_exactly_two_sides(self):
-        container, boxes = load_instance("data/small.json")
+        containers, boxes = load_instance("data/small.json")
         checked = 0
         for seed in range(10):
-            space = StateSpace(container, boxes, seed=seed)
+            space = StateSpace(containers, boxes, seed=seed)
             state = space.generate_initial_state()
             for neighbor in space._rotated_states(state.placed):
                 changed = [
-                    label for label in state.placed
-                    if neighbor.placed[label].dimensions != state.placed[label].dimensions
+                    label for label in state.placed[containers[0].label]
+                    if neighbor.placed[containers[0].label][label].dimensions != state.placed[containers[0].label][label].dimensions
                 ]
                 self.assertEqual(len(changed), 1)
                 label = changed[0]
-                self.assertIn(neighbor.placed[label].dimensions, quarter_turns(state.placed[label].dimensions))
-                self.assertEqual(neighbor.placed[label].position, state.placed[label].position)
+                self.assertIn(neighbor.placed[containers[0].label][label].dimensions, quarter_turns(state.placed[containers[0].label][label].dimensions))
+                self.assertEqual(neighbor.placed[containers[0].label][label].position, state.placed[containers[0].label][label].position)
                 checked += 1
         self.assertGreater(checked, 0)
 
-
 class TestRestartHistory(unittest.TestCase):
     def test_raw_history_covers_every_restart(self):
-        container, boxes = load_instance("data/small.json")
-        rr = RandomRestartHillClimbing(container, boxes, 3, 20, seed=5)
+        containers, boxes = load_instance("data/small.json")
+        rr = RandomRestartHillClimbing(containers, boxes, 3, 20, seed=5)
         rr.run()
         self.assertEqual(len(rr.history_raw), sum(n + 1 for n in rr.iterations_per_restart))
         self.assertEqual(len(rr.history_raw), len(rr.history_fitness))
@@ -52,34 +50,32 @@ class TestRestartHistory(unittest.TestCase):
             self.assertLessEqual(raw, best)
 
     def test_local_optimum_flag_matches_counter(self):
-        container, boxes = load_instance("data/small.json")
-        rr = RandomRestartHillClimbing(container, boxes, 3, 20, seed=5)
+        containers, boxes = load_instance("data/small.json")
+        rr = RandomRestartHillClimbing(containers, boxes, 3, 20, seed=5)
         rr.run()
         self.assertEqual(rr.stopped_at_local_optimum, rr.restarts_at_local_optimum == rr.restarts)
 
     def test_steepest_history_matches_objective(self):
-        container, boxes = load_instance("data/small.json")
-        hc = SteepestAscentHillClimbing(container, boxes, 30, seed=2)
+        containers, boxes = load_instance("data/small.json")
+        hc = SteepestAscentHillClimbing(containers, boxes, 30, seed=2)
         final = hc.run()
         self.assertEqual(hc.history_fitness[-1], hc.f(final))
 
-
 class TestAnnealingMetrics(unittest.TestCase):
     def test_trapped_metrics_and_stop_reason(self):
-        container, boxes = load_instance("data/small.json")
-        sa = SimulatedAnnealing(container, boxes, max_iterations=400, seed=4, stuck_window=5)
+        containers, boxes = load_instance("data/small.json")
+        sa = SimulatedAnnealing(containers, boxes, max_iterations=400, seed=4, stuck_window=5)
         sa.run()
         self.assertTrue(0.0 <= sa.trapped_frequency <= 1.0)
         self.assertLessEqual(sa.trapped_episodes, sa.trapped_iterations)
         self.assertIn(sa.stop_reason, ("batas iterasi tercapai", "suhu minimum tercapai"))
 
     def test_stop_reason_temperature(self):
-        container, boxes = load_instance("data/small.json")
-        sa = SimulatedAnnealing(container, boxes, max_iterations=5000, initial_temperature=1.0,
+        containers, boxes = load_instance("data/small.json")
+        sa = SimulatedAnnealing(containers, boxes, max_iterations=5000, initial_temperature=1.0,
                                 cooling_rate=0.5, min_temperature=0.01, seed=1)
         sa.run()
         self.assertEqual(sa.stop_reason, "suhu minimum tercapai")
-
 
 class TestLoaderAndOrientation(unittest.TestCase):
     def write(self, payload):
@@ -99,7 +95,7 @@ class TestLoaderAndOrientation(unittest.TestCase):
         }
 
     def test_valid_instance(self):
-        container, boxes = load_instance(self.write(self.base()))
+        containers, boxes = load_instance(self.write(self.base()))
         self.assertEqual(len(boxes), 2)
 
     def test_duplicate_ids_rejected(self):
@@ -133,7 +129,6 @@ class TestLoaderAndOrientation(unittest.TestCase):
         self.assertEqual(orientation_code((2, 3, 4), (4, 3, 2)), "hlw")
         self.assertIsNone(orientation_code((2, 3, 4), (5, 3, 4)))
 
-
 class TestValidator(unittest.TestCase):
     def test_duplicate_across_inside_and_outside(self):
         inside = PackageView("A", (1, 1, 1), 1, 1, False, 1, (0, 0, 0))
@@ -160,18 +155,17 @@ class TestValidator(unittest.TestCase):
         self.assertAlmostEqual(recompute_objective(state, "eta_urgency"), 10.0 * (1 + 1 / 2))
         self.assertIsNone(recompute_objective(state, "unknown"))
 
-
 class TestDashboardConsistency(unittest.TestCase):
     def test_dashboard_reports_no_issue_for_clean_runs(self):
         from src.experiments.local_search_runner import run_local_search_experiments
         from src.visualization.data import load_dataset
         from src.visualization.dashboard import build_dashboard
 
-        container, boxes = load_instance("data/small.json")
+        containers, boxes = load_instance("data/small.json")
         for objective in ("default", "density", "eta_urgency"):
             with tempfile.TemporaryDirectory() as tmp:
                 run_local_search_experiments(
-                    container, boxes, tmp, repetitions=1, hc_max_iterations=8,
+                    containers, boxes, tmp, repetitions=1, hc_max_iterations=8,
                     sa_max_iterations=60, max_restarts=2, objective_type=objective, verbose=False,
                 )
                 dataset = load_dataset(tmp)
@@ -180,7 +174,6 @@ class TestDashboardConsistency(unittest.TestCase):
                 path, warnings = build_dashboard(tmp)
                 self.assertTrue(os.path.exists(path))
                 self.assertEqual(warnings, [])
-
 
 if __name__ == "__main__":
     unittest.main()

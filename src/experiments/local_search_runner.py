@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from ..models.box import Box
 from ..models.container import Container
@@ -15,9 +15,8 @@ from ..visualization.records import (
     write_summary,
 )
 
-
 def run_local_search_experiments(
-    container: Container,
+    containers: List[Container],
     boxes: Dict[str, Box],
     output_dir: str = "output",
     repetitions: int = 3,
@@ -29,18 +28,13 @@ def run_local_search_experiments(
     verbose: bool = True,
 ) -> Dict[str, str]:
     variants = {
-        "steepest": ("Steepest Ascent", lambda s: SteepestAscentHillClimbing(
-            container, boxes, hc_max_iterations, objective_type, s)),
-        "sideways": ("Sideways Move", lambda s: SidewaysMoveHillClimbing(
-            container, boxes, hc_max_iterations, max_sideways_moves, objective_type, s)),
-        "stochastic": ("Stochastic", lambda s: StochasticHillClimbing(
-            container, boxes, hc_max_iterations * 3, 200, objective_type, s)),
-        "restart": ("Random Restart", lambda s: RandomRestartHillClimbing(
-            container, boxes, max_restarts, hc_max_iterations, objective_type, s)),
+        "steepest": ("Steepest Ascent", lambda s: SteepestAscentHillClimbing(containers, boxes, hc_max_iterations, objective_type, s)),
+        "sideways": ("Sideways Move", lambda s: SidewaysMoveHillClimbing(containers, boxes, hc_max_iterations, max_sideways_moves, objective_type, s)),
+        "stochastic": ("Stochastic", lambda s: StochasticHillClimbing(containers, boxes, hc_max_iterations * 3, 200, objective_type, s)),
+        "restart": ("Random Restart", lambda s: RandomRestartHillClimbing(containers, boxes, max_restarts, hc_max_iterations, objective_type, s)),
     }
 
     paths: Dict[str, str] = {}
-
     for key, (group, factory) in variants.items():
         runs = []
         for rep in range(1, repetitions + 1):
@@ -51,26 +45,20 @@ def run_local_search_experiments(
             if verbose:
                 print(f"[HC {group}] run {rep}: {hc.final_state.total_value} ({hc.search_duration:.3f}s)")
         paths[f"hc_{key}"] = write_summary(
-            output_dir, "Hill-climbing", container, len(boxes), runs,
+            output_dir, "Hill-climbing", containers, len(boxes), runs,
             filename=f"hc_{key}_summary.json", objective=objective_type,
         )
 
     sa_runs = []
     for rep in range(1, repetitions + 1):
         seed = 100 + rep
-        sa = SimulatedAnnealing(
-            container, boxes,
-            max_iterations=sa_max_iterations,
-            objective_type=objective_type,
-            seed=seed,
-        )
+        sa = SimulatedAnnealing(containers, boxes, max_iterations=sa_max_iterations, objective_type=objective_type, seed=seed)
         sa.run()
         sa_runs.append(simulated_annealing_record(sa, output_dir, f"sa_run{rep}", rep, rep, seed, "Simulated Annealing"))
         if verbose:
             print(f"[SA] run {rep}: {sa.final_state.total_value} ({sa.search_duration:.3f}s)")
     paths["sa"] = write_summary(
-        output_dir, "Simulated Annealing", container, len(boxes), sa_runs,
+        output_dir, "Simulated Annealing", containers, len(boxes), sa_runs,
         filename="sa_summary.json", objective=objective_type,
     )
-
     return paths

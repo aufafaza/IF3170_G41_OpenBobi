@@ -238,6 +238,30 @@ def state_from_dict(data: Any) -> StateView:
     if not isinstance(data, dict):
         raise ValueError("file solusi harus berupa objek JSON")
     try:
+        # Format multi-truk (bonus)
+        containers = data.get("containers", [])
+        if containers:
+            primary_truck = containers[0]
+            truck_label = str(primary_truck.get("label", "Truck"))
+            truck_dims = _vec3(primary_truck["dimensions"], "dimensi truk")
+            max_capacity = _number(primary_truck.get("max_capacity"), math.inf)
+            
+            trucks_placed = data.get("trucks_placed", {})
+            truck_data = trucks_placed.get(truck_label, {})
+            placed_packages = truck_data.get("placed_packages", [])
+            
+            placed = [_package(p, True) for p in placed_packages]
+            outside = [_package(p, False) for p in data.get("outside_packages", [])]
+            
+            return StateView(
+                truck_label=truck_label,
+                truck_dims=truck_dims,
+                max_capacity=max_capacity,
+                placed=placed,
+                outside=outside,
+            )
+            
+        # Fallback ke format lama (single-truk tanpa key "containers")
         truck = data["truck"]
         placed = [_package(p, True) for p in data.get("placed_packages", [])]
         outside = [_package(p, False) for p in data.get("outside_packages", [])]
@@ -248,7 +272,7 @@ def state_from_dict(data: Any) -> StateView:
             placed=placed,
             outside=outside,
         )
-    except (KeyError, TypeError, AttributeError) as exc:
+    except (KeyError, TypeError, AttributeError, IndexError) as exc:
         raise ValueError(f"struktur file solusi tidak lengkap ({exc!r})") from exc
 
 def recompute_objective(state: StateView, objective: Optional[str]) -> Optional[float]:

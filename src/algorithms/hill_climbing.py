@@ -7,18 +7,16 @@ from ..models.state import State
 from .state_space import StateSpace
 
 class SteepestAscentHillClimbing(StateSpace):
-
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         max_iterations: int = 100,
         objective_type: str = "default",
         seed: Optional[int] = None,
     ):
-        super().__init__(container, boxes, objective_type, seed)
+        super().__init__(containers, boxes, objective_type, seed)
         self.max_iterations = max(1, max_iterations)
-
         self.iterations: int = 0
         self.neighbors_evaluated: int = 0
         self.stopped_at_local_optimum: bool = False
@@ -29,7 +27,6 @@ class SteepestAscentHillClimbing(StateSpace):
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
-
         current = self.generate_initial_state()
         current_f = self.f(current)
         self.initial_state = current
@@ -65,23 +62,21 @@ class SteepestAscentHillClimbing(StateSpace):
         return current
 
 class SidewaysMoveHillClimbing(SteepestAscentHillClimbing):
-
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         max_iterations: int = 200,
         max_sideways_moves: int = 25,
         objective_type: str = "default",
         seed: Optional[int] = None,
     ):
-        super().__init__(container, boxes, max_iterations, objective_type, seed)
+        super().__init__(containers, boxes, max_iterations, objective_type, seed)
         self.max_sideways_moves = max(0, max_sideways_moves)
         self.sideways_moves: int = 0
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
-
         current = self.generate_initial_state()
         current_f = self.f(current)
         self.initial_state = current
@@ -129,20 +124,18 @@ class SidewaysMoveHillClimbing(SteepestAscentHillClimbing):
         return current
 
 class StochasticHillClimbing(StateSpace):
-
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         max_iterations: int = 500,
         max_stagnation: int = 200,
         objective_type: str = "default",
         seed: Optional[int] = None,
     ):
-        super().__init__(container, boxes, objective_type, seed)
+        super().__init__(containers, boxes, objective_type, seed)
         self.max_iterations = max(1, max_iterations)
         self.max_stagnation = max(1, max_stagnation)
-
         self.iterations: int = 0
         self.neighbors_evaluated: int = 0
         self.stopped_at_local_optimum: bool = False
@@ -153,7 +146,6 @@ class StochasticHillClimbing(StateSpace):
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
-
         current = self.generate_initial_state()
         current_f = self.f(current)
         self.initial_state = current
@@ -192,20 +184,18 @@ class StochasticHillClimbing(StateSpace):
         return current
 
 class RandomRestartHillClimbing(StateSpace):
-
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         max_restarts: int = 5,
         max_iterations: int = 200,
         objective_type: str = "default",
         seed: Optional[int] = None,
     ):
-        super().__init__(container, boxes, objective_type, seed)
+        super().__init__(containers, boxes, objective_type, seed)
         self.max_restarts = max(1, max_restarts)
         self.max_iterations = max(1, max_iterations)
-
         self.restarts: int = 0
         self.iterations_per_restart: List[int] = []
         self.restart_final_values: List[float] = []
@@ -221,7 +211,6 @@ class RandomRestartHillClimbing(StateSpace):
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
-
         self.restarts = 0
         self.iterations_per_restart = []
         self.restart_final_values = []
@@ -239,7 +228,7 @@ class RandomRestartHillClimbing(StateSpace):
 
         while self.restarts < self.max_restarts:
             climber = SteepestAscentHillClimbing(
-                self.container,
+                self.containers,
                 self.boxes,
                 self.max_iterations,
                 self.objective_type,

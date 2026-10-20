@@ -10,7 +10,7 @@ from .state_space import StateSpace
 class SimulatedAnnealing(StateSpace):
     def __init__(
         self,
-        container: Container,
+        containers: List[Container],
         boxes: Dict[str, Box],
         max_iterations: int = 1000,
         initial_temperature: float = 100.0,
@@ -20,7 +20,7 @@ class SimulatedAnnealing(StateSpace):
         seed: Optional[int] = None,
         stuck_window: int = 50,
     ):
-        super().__init__(container, boxes, objective_type, seed)
+        super().__init__(containers, boxes, objective_type, seed)
         self.max_iterations = max(1, max_iterations)
         self.initial_temperature = initial_temperature
         self.cooling_rate = cooling_rate
@@ -50,7 +50,6 @@ class SimulatedAnnealing(StateSpace):
 
     def run(self, progress_callback: Optional[Callable[[int, float], None]] = None) -> State:
         start_time = time.perf_counter()
-
         current = self.generate_initial_state()
         current_f = self.f(current)
         best, best_f = current, current_f
@@ -153,13 +152,3 @@ class SimulatedAnnealing(StateSpace):
     @property
     def trapped_frequency(self) -> float:
         return self.trapped_iterations / self.iterations if self.iterations else 0.0
-
-    def plot_data(self) -> Dict[str, list]:
-        return {
-            "iteration": list(range(1, self.iterations + 1)),
-            "temperature": self.history_temperature[:-1],
-            "delta_f": self.history_delta,
-            "acceptance_probability": self.history_acceptance_probability,
-            "current_fitness": self.history_current[1:],
-            "best_fitness": self.history_best[1:],
-        }

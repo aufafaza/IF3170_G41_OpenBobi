@@ -12,10 +12,10 @@ def make_run(key, group, repetition=1):
 
 class TestStateResolution(unittest.TestCase):
     def setUp(self):
-        self.container, self.boxes = load_instance("data/small.json")
+        self.containers, self.boxes = load_instance("data/small.json")
 
     def test_valid_state_updates_score(self):
-        space = StateSpace(self.container, self.boxes, seed=1)
+        space = StateSpace(self.containers, self.boxes, seed=1)
         state = space.generate_initial_state()
         valid, score = state_resolution(state)
         self.assertTrue(valid)
@@ -25,7 +25,8 @@ class TestStateResolution(unittest.TestCase):
     def test_invalid_state_scores_zero(self):
         label = next(iter(self.boxes))
         dims = self.boxes[label].dimensions
-        state = State(self.container, self.boxes, {label: Placement((0, 0, 3), dims)})
+        placed = {self.containers[0].label: {label: Placement((0, 0, 3), dims)}}
+        state = State(self.containers, self.boxes, placed)
         valid, score = state_resolution(state)
         self.assertFalse(valid)
         self.assertEqual(score, 0.0)

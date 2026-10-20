@@ -49,9 +49,13 @@ def _relative(path: str, base: str) -> str:
 def _state_summary(state: Any) -> Dict[str, Any]:
     if state is None:
         return {}
+    
+    # Karena format state sekarang multi-truk, kita hitung total paket dari semua truk
+    total_packages = sum(len(pkgs) for pkgs in state.placed.values())
+    
     return {
         "total_value": state.total_value,
-        "packages_placed": len(state.placed),
+        "packages_placed": total_packages,
         "volume_utilization": round(state.volume_utilization_ratio * 100, 2),
         "weight_utilization": round(state.weight_utilization_ratio * 100, 2),
     }
@@ -138,7 +142,7 @@ def simulated_annealing_record(
 def write_summary(
     output_dir: str,
     algorithm: str,
-    container: Any,
+    containers: List[Any],
     total_packages: int,
     runs: Iterable[Dict[str, Any]],
     filename: Optional[str] = None,
@@ -149,14 +153,20 @@ def write_summary(
     os.makedirs(folder, exist_ok=True)
     slug = re.sub(r"[^a-z0-9]+", "_", algorithm.lower()).strip("_") or "run"
     path = os.path.join(folder, filename or f"{slug}_summary.json")
+    
+    # Simpan list containers (karena sekarang bisa lebih dari 1 truk)
+    containers_data = [
+        {
+            "label": c.label,
+            "dimensions": list(c.dimensions),
+            "max_capacity": c.max_capacity,
+        } for c in containers
+    ]
+    
     summary = {
         "metadata": {
             "algorithm": algorithm,
-            "container": {
-                "label": container.label,
-                "dimensions": list(container.dimensions),
-                "max_capacity": container.max_capacity,
-            },
+            "containers": containers_data,
             "total_packages": total_packages,
             "total_runs": len(run_list),
             **metadata,
